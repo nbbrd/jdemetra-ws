@@ -20,9 +20,8 @@ package ec.nbb.demetra.exception;
  *
  * @author Mats Maggi
  */
-public class TerrorException extends Exception {
-
-    public TerrorException(String message) {
+public class TerrorException extends Exception {    
+    public TerrorException(int code, String message) {
         super(message);
     }
 }

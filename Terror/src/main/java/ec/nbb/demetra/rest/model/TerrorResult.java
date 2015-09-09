@@ -16,8 +16,8 @@
  */
 package ec.nbb.demetra.rest.model;
 
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class TerrorResult {
 
     private String name;
-    private double[] value;    
+    private double[] value;
     private double[] forecast;
     private double[] score;
 
@@ -43,7 +43,7 @@ public class TerrorResult {
         this.forecast = forecast;
         this.score = score;
     }
-    
+
     public TerrorResult(String name) {
         this.name = name;
     }
@@ -74,7 +74,7 @@ public class TerrorResult {
     public String getName() {
         return name;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }

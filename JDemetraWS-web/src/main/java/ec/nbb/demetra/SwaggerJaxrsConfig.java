@@ -16,12 +16,7 @@
  */
 package ec.nbb.demetra;
 
-import com.wordnik.swagger.config.ConfigFactory;
-import com.wordnik.swagger.config.ScannerFactory;
-import com.wordnik.swagger.config.SwaggerConfig;
-import com.wordnik.swagger.jaxrs.config.DefaultJaxrsScanner;
-import com.wordnik.swagger.jaxrs.reader.DefaultJaxrsApiReader;
-import com.wordnik.swagger.reader.ClassReaders;
+import io.swagger.jaxrs.config.BeanConfig;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -31,19 +26,22 @@ import javax.servlet.http.HttpServlet;
  *
  * @author Mats Maggi
  */
-@WebServlet(name = "SwaggerJaxrsConfig", loadOnStartup = 1)
+@WebServlet(name = "SwaggerJaxrsConfig", loadOnStartup = 2)
 public class SwaggerJaxrsConfig extends HttpServlet {
 
     @Override
     public void init(ServletConfig servletConfig) {
         try {
             super.init(servletConfig);
-            SwaggerConfig swaggerConfig = new SwaggerConfig();
-            ConfigFactory.setConfig(swaggerConfig);
-            swaggerConfig.setBasePath("http://localhost:8080/JDemetraWS-web/api");
-            swaggerConfig.setApiVersion("1.0.0");
-            ScannerFactory.setScanner(new DefaultJaxrsScanner());
-            ClassReaders.setReader(new DefaultJaxrsApiReader());
+            BeanConfig beanConfig = new BeanConfig();
+            beanConfig.setVersion("1.0.0");
+            beanConfig.setSchemes(new String[]{"http"});
+            beanConfig.setHost("srvdqrdd2.nbb.local:9998");
+            beanConfig.setTitle("JDemetra Web Service");
+            beanConfig.setBasePath("/demetra/api");
+            beanConfig.setResourcePackage("ec.nbb.demetra.rest");
+            beanConfig.setScan(true);
+
         } catch (ServletException e) {
             System.out.println(e.getMessage());
         }

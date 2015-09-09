@@ -1,6 +1,9 @@
 package ec.nbb.demetra.rest.terror.test;
 
 import com.google.common.base.Stopwatch;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
 import ec.nbb.demetra.rest.model.TerrorRequest;
 import ec.nbb.demetra.rest.model.TerrorResults;
 import ec.tss.TsCollection;
@@ -11,17 +14,13 @@ import ec.tss.xml.XmlTsCollection;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
 import java.util.Set;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 
 /*
  * Copyright 2014 National Bank of Belgium
  *
- * Licensed under the EUPL, Version 1.1 or – as soon they will be approved 
+ * Licensed under the EUPL, Version 1.1 or â€“ as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
  * You may obtain a copy of the Licence at:
@@ -38,13 +37,12 @@ import org.junit.Test;
  *
  * @author Mats Maggi
  */
-public class TerrorTest extends JerseyTest {
+public class TerrorTest {
 
-    @Override
-    protected Application configure() {
+    private Set<Class<?>> configure() {
         Set<Class<?>> resources = new java.util.HashSet<>();
         resources.add(ec.nbb.demetra.rest.TerrorResource.class);
-        return new ResourceConfig(resources);
+        return resources;
     }
 
     @Test
@@ -64,13 +62,15 @@ public class TerrorTest extends JerseyTest {
         input.setSeries(xmlCollection);
         input.setSpecification("TR4");
 
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.start();
-        
-        TerrorResults r = client()
-                .target("http://localhost:8080/JDemetraWS-web/api/")
-                .path("terror").request(MediaType.APPLICATION_XML_TYPE)
-                .post(Entity.entity(input, MediaType.APPLICATION_XML_TYPE), TerrorResults.class);
+        Stopwatch stopwatch = Stopwatch.createStarted();
+       
+        Client client = Client.create(new DefaultClientConfig());
+        WebResource service = client.resource("http://srvdqrdd2.nbb.local:9998/demetra/api");
+        TerrorResults resp = service.path("terror")
+                .accept(MediaType.APPLICATION_XML)
+                .entity(input, MediaType.APPLICATION_XML)
+                .post(TerrorResults.class, input);
+        System.out.println(resp.getCount());
         System.out.println(stopwatch.stop().toString());
     }
 }

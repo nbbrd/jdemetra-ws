@@ -25,13 +25,30 @@ import javax.ws.rs.ext.Provider;
  * @author Mats Maggi
  */
 @Provider
-public class DemetraExceptionMapper implements ExceptionMapper<Exception> {
+public class DemetraExceptionMapper implements ExceptionMapper<TerrorException> {
 
     @Override
-    public Response toResponse(Exception exception) {
+    public Response toResponse(TerrorException exception) {
         exception.printStackTrace();
         return Response.serverError().entity(exception.getMessage()).build();
 
+//        if (exception instanceof NotFoundException) {
+//            return Response.status(Status.NOT_FOUND)
+//                    .entity(new ApiResponse(ApiResponse.ERROR, exception
+//                                    .getMessage())).build();
+//        } else if (exception instanceof BadRequestException) {
+//            return Response.status(Status.BAD_REQUEST)
+//                    .entity(new ApiResponse(ApiResponse.ERROR, exception
+//                                    .getMessage())).build();
+//        } else if (exception instanceof ApiException) {
+//            return Response.status(Status.BAD_REQUEST)
+//                    .entity(new ApiResponse(ApiResponse.ERROR, exception
+//                                    .getMessage())).build();
+//        } else {
+//            return Response.status(Status.INTERNAL_SERVER_ERROR)
+//                    .entity(new ApiResponse(ApiResponse.ERROR,
+//                                    "a system error occured")).build();
+//        }
     }
 
 }

@@ -16,8 +16,8 @@
  */
 package ec.nbb.demetra.rest.model;
 
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,7 +42,7 @@ public class TerrorResults {
         this.results = new ArrayList<>(results);
     }
 
-    @ApiModelProperty(required = true, position = 1)
+    @ApiModelProperty(required = true)
     @XmlElement(name = "result", required = true)
     public List<TerrorResult> getResults() {
         return results;
@@ -52,7 +52,7 @@ public class TerrorResults {
         this.results = results;
     }
     
-    @ApiModelProperty(required = true, position = 2)
+    @ApiModelProperty(required = true)
     @XmlAttribute(name = "size", required = true)
     public int getCount() {
         return results.size();
