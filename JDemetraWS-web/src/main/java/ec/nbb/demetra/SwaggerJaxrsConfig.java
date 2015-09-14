@@ -17,6 +17,7 @@
 package ec.nbb.demetra;
 
 import io.swagger.jaxrs.config.BeanConfig;
+import io.swagger.models.Info;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -37,8 +38,16 @@ public class SwaggerJaxrsConfig extends HttpServlet {
             beanConfig.setVersion("1.0.0");
             beanConfig.setSchemes(new String[]{"http"});
             beanConfig.setHost("srvdqrdd2.nbb.local:9998");
-            beanConfig.setTitle("JDemetra Web Service");
+            beanConfig.setPrettyPrint(true);
+            beanConfig.setTitle("JDemetra+ Web Service");
+            Info info = new Info();
+            info.setTitle("JDemetra Web Service");
+            info.setDescription("Web service providing access to JDemetra+ algorithms");
+            info.setVersion("1.0.0");
+            beanConfig.setInfo(info);
+
             beanConfig.setBasePath("/demetra/api");
+            // Package containing web services to scan
             beanConfig.setResourcePackage("ec.nbb.demetra.rest");
             beanConfig.setScan(true);
 

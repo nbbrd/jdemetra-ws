@@ -55,7 +55,7 @@ public class TerrorResults {
     @ApiModelProperty(required = true)
     @XmlAttribute(name = "size", required = true)
     public int getCount() {
-        return results.size();
+        return results == null ? 0 : results.size();
     }
     
     @ApiModelProperty(access = "hidden")
