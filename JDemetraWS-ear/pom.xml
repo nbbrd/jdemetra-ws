@@ -43,12 +43,6 @@
     <dependencies>
         <dependency>
             <groupId>ec.nbb.demetra</groupId>
-            <artifactId>JDemetraWS-ejb</artifactId>
-            <version>0.0.1</version>
-            <type>ejb</type>
-        </dependency>
-        <dependency>
-            <groupId>ec.nbb.demetra</groupId>
             <artifactId>JDemetraWS-web</artifactId>
             <version>0.0.1</version>
             <type>war</type>
