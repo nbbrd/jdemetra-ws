@@ -37,7 +37,8 @@ public class SwaggerJaxrsConfig extends HttpServlet {
             BeanConfig beanConfig = new BeanConfig();
             beanConfig.setVersion("1.0.0");
             beanConfig.setSchemes(new String[]{"http"});
-            beanConfig.setHost("srvdqrdd2.nbb.local:9998");
+            beanConfig.setHost("localhost:8080");
+            //beanConfig.setHost("srvdqrdd2.nbb.local:9998");
             beanConfig.setPrettyPrint(true);
             beanConfig.setTitle("JDemetra+ Web Service");
             Info info = new Info();
@@ -50,7 +51,7 @@ public class SwaggerJaxrsConfig extends HttpServlet {
             // Package containing web services to scan
             beanConfig.setResourcePackage("ec.nbb.demetra.rest");
             beanConfig.setScan(true);
-
+            
         } catch (ServletException e) {
             System.out.println(e.getMessage());
         }

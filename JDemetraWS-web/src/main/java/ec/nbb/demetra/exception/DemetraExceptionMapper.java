@@ -17,6 +17,7 @@
 package ec.nbb.demetra.exception;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
@@ -25,30 +26,18 @@ import javax.ws.rs.ext.Provider;
  * @author Mats Maggi
  */
 @Provider
-public class DemetraExceptionMapper implements ExceptionMapper<TerrorException> {
+public class DemetraExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
-    public Response toResponse(TerrorException exception) {
+    public Response toResponse(Throwable exception) {
         exception.printStackTrace();
-        return Response.serverError().entity(exception.getMessage()).build();
+        if (exception instanceof TerrorException) {
+            return Response.serverError().entity(exception).build();
+        } else {
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .entity(exception).build();
+        }
 
-//        if (exception instanceof NotFoundException) {
-//            return Response.status(Status.NOT_FOUND)
-//                    .entity(new ApiResponse(ApiResponse.ERROR, exception
-//                                    .getMessage())).build();
-//        } else if (exception instanceof BadRequestException) {
-//            return Response.status(Status.BAD_REQUEST)
-//                    .entity(new ApiResponse(ApiResponse.ERROR, exception
-//                                    .getMessage())).build();
-//        } else if (exception instanceof ApiException) {
-//            return Response.status(Status.BAD_REQUEST)
-//                    .entity(new ApiResponse(ApiResponse.ERROR, exception
-//                                    .getMessage())).build();
-//        } else {
-//            return Response.status(Status.INTERNAL_SERVER_ERROR)
-//                    .entity(new ApiResponse(ApiResponse.ERROR,
-//                                    "a system error occured")).build();
-//        }
     }
 
 }

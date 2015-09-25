@@ -16,6 +16,7 @@
  */
 package ec.nbb.demetra.rest;
 
+import ec.nbb.demetra.filter.Compress;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -37,6 +38,7 @@ import javax.ws.rs.core.Response;
 public class HelloResource {
 
     @GET
+    @Compress
     @Produces(MediaType.TEXT_PLAIN)
     @ApiOperation(value = "Says hello", notes = "Says hello !", response = String.class)
     @ApiResponses(
@@ -49,7 +51,7 @@ public class HelloResource {
     public Response hello() {
         try {
             String name = InetAddress.getLocalHost().getHostName();
-            return Response.status(Response.Status.OK).entity("Hello : " + name).build();
+            return Response.status(Response.Status.OK).entity(name).build();
         } catch (UnknownHostException ex) {
             return Response.status(Response.Status.OK).entity("Hello World !").build();
         }

@@ -33,11 +33,17 @@ public class ApplicationConfig extends Application {
         // Swagger resources
         resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
         resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+        resources.add(io.swagger.jaxrs.json.JacksonJsonProvider.class);
         
         // Application resources
         resources.add(ec.nbb.demetra.exception.DemetraExceptionMapper.class);
+        resources.add(org.glassfish.jersey.jackson.JacksonFeature.class);
+        resources.add(ec.nbb.demetra.filter.GZipWriterInterceptor.class);
+        resources.add(ec.nbb.demetra.filter.GZipReaderInterceptor.class);
         resources.add(ec.nbb.demetra.rest.TerrorResource.class);
         resources.add(ec.nbb.demetra.rest.HelloResource.class);
+        resources.add(ec.nbb.demetra.rest.AnomalyDetectionResource.class);
+        resources.add(ec.nbb.demetra.rest.BalancingResource.class);
 
         return resources;
     }

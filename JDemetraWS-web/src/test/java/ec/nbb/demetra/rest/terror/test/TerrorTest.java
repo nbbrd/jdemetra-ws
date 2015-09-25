@@ -1,9 +1,6 @@
 package ec.nbb.demetra.rest.terror.test;
 
 import com.google.common.base.Stopwatch;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 import ec.nbb.demetra.rest.model.TerrorRequest;
 import ec.nbb.demetra.rest.model.TerrorResults;
 import ec.tss.TsCollection;
@@ -13,7 +10,10 @@ import ec.tss.TsInformationType;
 import ec.tss.xml.XmlTsCollection;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
-import java.util.Set;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
 
@@ -39,12 +39,6 @@ import org.junit.Test;
  */
 public class TerrorTest {
 
-    private Set<Class<?>> configure() {
-        Set<Class<?>> resources = new java.util.HashSet<>();
-        resources.add(ec.nbb.demetra.rest.TerrorResource.class);
-        return resources;
-    }
-
     @Test
     public void testTerror() {
         TerrorRequest input = new TerrorRequest();
@@ -64,13 +58,15 @@ public class TerrorTest {
 
         Stopwatch stopwatch = Stopwatch.createStarted();
        
-        Client client = Client.create(new DefaultClientConfig());
-        WebResource service = client.resource("http://srvdqrdd2.nbb.local:9998/demetra/api");
+        Client client = ClientBuilder.newClient();
+        //WebResource service = client.resource("http://srvdqrdd2.nbb.local:9998/demetra/api");
+        WebTarget service = client.target("http://localhost:8080/demetra/api");
         TerrorResults resp = service.path("terror")
-                .accept(MediaType.APPLICATION_XML)
-                .entity(input, MediaType.APPLICATION_XML)
-                .post(TerrorResults.class, input);
+                .request(MediaType.APPLICATION_XML)
+                .post(Entity.entity(input, MediaType.APPLICATION_XML), TerrorResults.class);
         System.out.println(resp.getCount());
         System.out.println(stopwatch.stop().toString());
+        
+        
     }
 }
