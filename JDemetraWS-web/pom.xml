@@ -7,7 +7,6 @@
         <version>0.0.1</version>
     </parent>
     
-
     <groupId>ec.nbb.demetra</groupId>
     <artifactId>JDemetraWS-web</artifactId>
     <version>0.0.1</version>
@@ -66,6 +65,7 @@
     </dependencies>
 
     <build>
+        <finalName>demetra</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

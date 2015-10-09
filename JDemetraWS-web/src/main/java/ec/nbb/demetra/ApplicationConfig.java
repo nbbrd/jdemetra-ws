@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 National Bank of Belgium
+ * Copyright 2015 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or – as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -34,7 +34,7 @@ public class ApplicationConfig extends Application {
         resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
         resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
         resources.add(io.swagger.jaxrs.json.JacksonJsonProvider.class);
-        
+
         // Application resources
         resources.add(ec.nbb.demetra.exception.DemetraExceptionMapper.class);
         resources.add(org.glassfish.jersey.jackson.JacksonFeature.class);
@@ -44,6 +44,7 @@ public class ApplicationConfig extends Application {
         resources.add(ec.nbb.demetra.rest.HelloResource.class);
         resources.add(ec.nbb.demetra.rest.AnomalyDetectionResource.class);
         resources.add(ec.nbb.demetra.rest.BalancingResource.class);
+        resources.add(ec.nbb.demetra.rest.SeasonalAdjustmentResource.class);
 
         return resources;
     }

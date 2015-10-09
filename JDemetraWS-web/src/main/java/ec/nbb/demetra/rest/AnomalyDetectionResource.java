@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 National Bank of Belgium
+ * Copyright 2015 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or – as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -16,11 +16,15 @@
  */
 package ec.nbb.demetra.rest;
 
+import ec.nbb.demetra.filter.Compress;
 import ec.nbb.demetra.json.JsonTsPeriod;
 import ec.nbb.demetra.model.outlier.Outlier;
 import ec.nbb.demetra.model.outlier.OutlierRequest;
 import ec.nbb.demetra.model.outlier.OutlierResult;
 import ec.nbb.demetra.model.outlier.OutlierResults;
+import ec.nbb.demetra.model.outlier.ShadowOutlier;
+import ec.nbb.demetra.model.outlier.ShadowTs;
+import ec.nbb.demetra.model.rest.utils.RestUtils;
 import ec.tss.TsCollection;
 import ec.tstoolkit.modelling.DefaultTransformationType;
 import ec.tstoolkit.modelling.arima.IPreprocessor;
@@ -34,6 +38,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -167,5 +173,53 @@ public class AnomalyDetectionResource {
 
     private void setTransformation(TramoSpecification spec, String transform) {
         spec.getTransform().setFunction(DefaultTransformationType.valueOf(transform));
+    }
+
+    @POST
+    @Path("/new")
+    @Compress
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Process an outlier detection on a given Ts", notes = "Creates an outlier detection", response = ShadowOutlier.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "Successful processing of outlier detection", response = ShadowOutlier.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response outlierDetection(@ApiParam(name = "ShadowTs", required = true) ShadowTs ts) {
+        TramoSpecification spec = TramoSpecification.TRfull;
+        setShownOutliers(spec, true, true, true, true);
+        setTransformation(spec, "None");
+        spec.getOutliers().setCriticalValue(2.5);
+
+        List<ShadowOutlier> outliers = new ArrayList<>();
+
+        IPreprocessor processor = spec.build();
+
+        TsData tsData = RestUtils.createTsData(ts);
+
+        OutlierEstimation[] oe;
+        PreprocessingModel model = processor.process(tsData, null);
+        if (model != null) {
+            oe = model.outliersEstimation(true, false);
+
+            if (oe != null && oe.length > 0) {
+                for (OutlierEstimation out : oe) {
+                    ShadowOutlier o = new ShadowOutlier();
+                    int year = out.getPosition().getYear();
+                    int placeinyear = out.getPosition().getPosition();
+                    o.setPeriod(year * ts.getFreq() + placeinyear);
+                    o.setOutlierType(out.getCode());
+                    o.setValue(out.getValue());
+                    o.setStdev(out.getStdev());
+
+                    outliers.add(o);
+                }
+            }
+        }
+
+        return Response.status(Status.OK).entity(outliers).build();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 National Bank of Belgium
+ * Copyright 2015 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or – as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -16,6 +16,7 @@
  */
 package ec.nbb.demetra.exception;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -30,14 +31,7 @@ public class DemetraExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable exception) {
-        exception.printStackTrace();
-        if (exception instanceof TerrorException) {
-            return Response.serverError().entity(exception).build();
-        } else {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .entity(exception).build();
-        }
-
+        return Response.status(Status.INTERNAL_SERVER_ERROR)
+                .entity(exception.getMessage()).type(MediaType.TEXT_PLAIN).build();
     }
-
 }

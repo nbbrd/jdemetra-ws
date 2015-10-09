@@ -1,29 +1,5 @@
-package ec.nbb.demetra.rest.terror.test;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.base.Stopwatch;
-import ec.nbb.demetra.json.JsonTsCollection;
-import ec.nbb.demetra.model.outlier.OutlierRequest;
-import ec.nbb.demetra.model.outlier.OutlierResults;
-import ec.tss.TsCollection;
-import ec.tss.TsCollectionInformation;
-import ec.tss.TsFactory;
-import ec.tss.TsInformationType;
-import ec.tstoolkit.timeseries.simplets.TsData;
-import ec.tstoolkit.timeseries.simplets.TsFrequency;
-import io.swagger.util.Json;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import org.junit.Test;
-
 /*
- * Copyright 2014 National Bank of Belgium
+ * Copyright 2015 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or â€“ as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -38,6 +14,37 @@ import org.junit.Test;
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
+package ec.nbb.demetra.rest.terror.test;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Stopwatch;
+import ec.nbb.demetra.json.JsonTsCollection;
+import ec.nbb.demetra.model.outlier.OutlierRequest;
+import ec.nbb.demetra.model.outlier.OutlierResults;
+import ec.nbb.demetra.model.outlier.ShadowOutlier;
+import ec.nbb.demetra.model.outlier.ShadowTs;
+import ec.tss.TsCollection;
+import ec.tss.TsCollectionInformation;
+import ec.tss.TsFactory;
+import ec.tss.TsInformationType;
+import ec.tstoolkit.timeseries.TsAggregationType;
+import ec.tstoolkit.timeseries.simplets.TsData;
+import ec.tstoolkit.timeseries.simplets.TsFrequency;
+import io.swagger.util.Json;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.glassfish.jersey.client.JerseyWebTarget;
+import org.glassfish.jersey.message.GZipEncoder;
+import org.junit.Test;
+
 /**
  *
  * @author Mats Maggi
@@ -109,5 +116,39 @@ public class OutlierTest {
                 .request(MediaType.APPLICATION_JSON)
                 .post(Entity.entity(input, MediaType.APPLICATION_JSON), OutlierResults.class);
         System.out.println(stopwatch.stop().toString());
+    }
+
+    @Test
+    public void outlierNewTest() {
+        ShadowTs ts = new ShadowTs();
+        ts.setAggregationMethod(TsAggregationType.None);
+        ts.setName("Blabla");
+        ts.setFreq(12);
+
+        double[] values = new double[24];
+        int[] periods = new int[24];
+        for (int i = 0; i < 24; i++) {
+            periods[i] = 2010 * 12 + i;
+
+            if (i == 5) {
+                values[i] = 2400;
+            } else {
+                values[i] = i;
+            }
+        }
+        ts.setValues(values);
+        ts.setPeriods(periods);
+
+        JerseyClientBuilder jcb = new JerseyClientBuilder();
+        jcb.register(GZipEncoder.class);
+        JerseyClient jc = jcb.build();
+
+        Stopwatch watch = Stopwatch.createStarted();
+        JerseyWebTarget jwt = jc.target("http://localhost:9998/demetra/api");
+        ShadowOutlier[] resp = jwt.path("outlier/new")
+                .request(MediaType.APPLICATION_JSON)
+                .acceptEncoding("gzip")
+                .post(Entity.entity(ts, MediaType.APPLICATION_JSON), ShadowOutlier[].class);
+        System.out.println(resp.length);
     }
 }

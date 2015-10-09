@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 National Bank of Belgium
+ * Copyright 2015 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or – as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -63,7 +63,8 @@ public class BalancingTest {
             JerseyClient jc = jcb.build();
 
             Stopwatch watch = Stopwatch.createStarted();
-            JerseyWebTarget jwt = jc.target("http://localhost:8080/demetra/api");
+            //JerseyWebTarget jwt = jc.target("http://localhost:9998/demetra/api");
+            JerseyWebTarget jwt = jc.target("https://pc0021770.nbb.local:8181/demetra/api"); // Needs installation of certificate
             Response resp = jwt.path("balancing")
                     .request(MediaType.APPLICATION_JSON)
                     .acceptEncoding("gzip")
@@ -72,7 +73,7 @@ public class BalancingTest {
                 Summary summary = resp.readEntity(Summary.class);
                 System.out.println("Nouvelles dimensions : " + summary.getDimensionsCount() + "\nTime elapsed : " +watch.stop().elapsed(TimeUnit.MILLISECONDS));
             }
-        } catch (Exception ex) {
+        } catch (IOException | NullPointerException ex) {
             ex.printStackTrace();
             Logger.getLogger(BalancingTest.class.getName()).log(Level.SEVERE, null, ex);
         } finally {

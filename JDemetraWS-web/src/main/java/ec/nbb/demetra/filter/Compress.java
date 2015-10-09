@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 National Bank of Belgium
+ * Copyright 2015 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or – as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -24,7 +24,6 @@ import javax.ws.rs.NameBinding;
  *
  * @author Mats Maggi
  */
-//@Compress annotation is the name binding annotation
 @NameBinding
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Compress {
