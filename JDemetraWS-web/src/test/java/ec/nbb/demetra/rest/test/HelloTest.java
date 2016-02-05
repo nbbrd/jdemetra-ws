@@ -14,12 +14,19 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package ec.nbb.demetra.rest.terror.test;
+package ec.nbb.demetra.rest.test;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.client.filter.EncodingFilter;
 import org.glassfish.jersey.message.GZipEncoder;
 import org.junit.Test;
@@ -37,11 +44,31 @@ public class HelloTest {
         client.register(EncodingFilter.class);
         //Client client = Client.create(new DefaultClientConfig());
         //WebResource service = client.resource("http://srvdqrdd2.nbb.local:9998/demetra/api");
-        WebTarget service = client.target("http://localhost:8080/demetra/api");
+        WebTarget service = client.target(TestConfig.getUrl());
         String resp = service.path("hello")
+                .queryParam("firstName", "Mats")
                 .request(MediaType.TEXT_PLAIN)
                 .get(String.class);
 
         System.out.println(resp);
+    }
+
+    @Test
+    public void helloAsync() {
+        try {
+            JerseyClientBuilder jcb = new JerseyClientBuilder();
+            jcb.register(GZipEncoder.class);
+            JerseyClient jc = jcb.build();
+            
+            JerseyWebTarget service = jc.target(TestConfig.getUrl());
+            Future<String> resp = service.path("hello/async")
+                    .request(MediaType.TEXT_PLAIN)
+                    .async()
+                    .get(String.class);
+
+            System.out.println(resp.get());
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(HelloTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

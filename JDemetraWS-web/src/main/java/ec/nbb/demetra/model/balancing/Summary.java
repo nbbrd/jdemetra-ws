@@ -35,6 +35,9 @@ public class Summary {
 
     @JsonProperty(value = "Constraints")
     private BalanceLinearConstraint[] constraints;
+    
+    @JsonProperty(value = "References")
+    private DataExtract[] references;
 
     @JsonProperty(value = "Constraints")
     public BalanceLinearConstraint[] getConstraints() {
@@ -74,5 +77,15 @@ public class Summary {
     @JsonProperty(value = "Dimensions")
     public void setDimensions(DimensionSummary[] dimensions) {
         this.dimensions = dimensions;
+    }
+
+    @JsonProperty(value = "References")
+    public DataExtract[] getReferences() {
+        return references;
+    }
+
+    @JsonProperty(value = "References")
+    public void setReferences(DataExtract[] references) {
+        this.references = references;
     }
 }

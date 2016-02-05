@@ -188,7 +188,7 @@ public class AnomalyDetectionResource {
                 @ApiResponse(code = 500, message = "Invalid request", response = String.class)
             }
     )
-    public Response outlierDetection(@ApiParam(name = "ShadowTs", required = true) ShadowTs ts) {
+    public Response outlierDetectionShadow(@ApiParam(name = "ShadowTs", required = true) ShadowTs ts) {
         TramoSpecification spec = TramoSpecification.TRfull;
         setShownOutliers(spec, true, true, true, true);
         setTransformation(spec, "None");
@@ -210,7 +210,7 @@ public class AnomalyDetectionResource {
                     ShadowOutlier o = new ShadowOutlier();
                     int year = out.getPosition().getYear();
                     int placeinyear = out.getPosition().getPosition();
-                    o.setPeriod(year * ts.getFreq() + placeinyear);
+                    o.setPeriod(year * tsData.getFrequency().intValue() + placeinyear);
                     o.setOutlierType(out.getCode());
                     o.setValue(out.getValue());
                     o.setStdev(out.getStdev());

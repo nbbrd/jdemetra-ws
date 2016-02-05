@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Mats Maggi
  */
-@WebFilter(filterName = "HTML5CorsFilter", urlPatterns = {"/api/*"})
+@WebFilter(filterName = "HTML5CorsFilter", urlPatterns = {"/api/*"}, asyncSupported = true)
 public class HTML5CorsFilter implements javax.servlet.Filter {
 
     @Override

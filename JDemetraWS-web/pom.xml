@@ -17,6 +17,9 @@
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.javax-servlet>3.1.0</version.javax-servlet>
+        <version.jetty>9.2.7.v20150116</version.jetty>        
+        <version.jersey>2.21</version.jersey>
     </properties>
     
     <dependencies>
@@ -24,6 +27,12 @@
             <groupId>ec.nbb.demetra</groupId>
             <artifactId>Terror</artifactId>
             <version>0.0.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax</groupId>
@@ -33,17 +42,41 @@
         </dependency>
         
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.12</version>
+        </dependency>
+        
+        <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-grizzly2-http</artifactId>
             <version>2.21</version>
         </dependency>
 
         <dependency>
+            <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+            <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
+            <version>2.21</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--<dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-grizzly2</artifactId>
             <version>1.19</version>
             <scope>test</scope>
-        </dependency>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>jsr311-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -60,9 +93,86 @@
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
-            <version>2.21</version>
+            <version>${version.jersey}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-jaxb</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.glassfish.grizzly</groupId>
+            <artifactId>grizzly-http</artifactId>
+            <version>2.3.22</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${version.javax-servlet}</version>
+        </dependency>
+
     </dependencies>
+    
+    <profiles>
+        <profile>
+            <id>appassembler</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Generate both Windows and Linux bash shell execution scripts -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>appassembler-maven-plugin</artifactId>
+                        <version>1.10</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>assemble</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <repositoryLayout>flat</repositoryLayout>
+                            <useWildcardClassPath>true</useWildcardClassPath>
+                            <!-- Set the target configuration directory to be used in the bin scripts -->
+                            <configurationDirectory>conf</configurationDirectory>
+                            <!-- Copy the contents from "/src/main/config" to the target
+                            configuration directory in the assembled application -->
+                            <copyConfigurationDirectory>true</copyConfigurationDirectory>
+                            <!-- Include the target configuration directory in the beginning of
+                            the classpath declaration in the bin scripts -->                    
+                            <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+
+                            <!-- Extra JVM arguments that will be included in the bin scripts -->
+                            <extraJvmArguments>-Xmx1024m</extraJvmArguments>
+
+                            <programs>
+                                <program>
+                                    <id>start</id>
+                                    <mainClass>ec.nbb.demetra.standalone.Main</mainClass>
+                                    <name>start</name>
+                                </program>
+                            </programs>
+                            <binFileExtensions>
+                                <unix>.sh</unix>
+                            </binFileExtensions>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <build>
         <finalName>demetra</finalName>
@@ -114,5 +224,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

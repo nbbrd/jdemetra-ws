@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 National Bank of Belgium
+ * Copyright 2014 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or – as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -22,24 +22,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @author Mats Maggi
  */
-public class CoreDefinitionSummary {
+public class DataExtract {
 
     @JsonProperty(value = "Per")
     private int period;
-    @JsonProperty(value = "Br")
-    private String branch;
-    @JsonProperty(value = "Prd")
-    private String product;
+    
     @JsonProperty(value = "F")
     private char flow;
+    
+    @JsonProperty(value = "Br")
+    private String branch;
+    
+    @JsonProperty(value = "Prd")
+    private String product;
+    
     @JsonProperty(value = "Var")
     private char variable;
+    
     @JsonProperty(value = "Val")
     private double value;
-    @JsonProperty(value = "LB")
-    private double lowerBound;
-    @JsonProperty(value = "UB")
-    private double upperBound;
 
     @JsonProperty(value = "Per")
     public int getPeriod() {
@@ -99,25 +100,5 @@ public class CoreDefinitionSummary {
     @JsonProperty(value = "Val")
     public void setValue(double value) {
         this.value = value;
-    }
-
-    @JsonProperty(value = "LB")
-    public double getLowerBound() {
-        return lowerBound;
-    }
-
-    @JsonProperty(value = "LB")
-    public void setLowerBound(double lowerBound) {
-        this.lowerBound = lowerBound;
-    }
-
-    @JsonProperty(value = "UB")
-    public double getUpperBound() {
-        return upperBound;
-    }
-
-    @JsonProperty(value = "UB")
-    public void setUpperBound(double upperBound) {
-        this.upperBound = upperBound;
     }
 }

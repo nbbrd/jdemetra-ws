@@ -16,6 +16,7 @@
  */
 package ec.nbb.demetra.rest.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -32,9 +33,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class TerrorResult {
 
+    @JsonProperty(value = "Name")
     private String name;
+    @JsonProperty(value = "Value")
     private double[] value;
+    @JsonProperty(value = "Forecast")
     private double[] forecast;
+    @JsonProperty(value = "Score")
     private double[] score;
 
     public TerrorResult(String name, double[] value, double[] forecast, double[] score) {
@@ -53,40 +58,48 @@ public class TerrorResult {
 
     @ApiModelProperty(required = true)
     @XmlElement(name = "forecast", required = true)
+    @JsonProperty(value = "Forecast")
     public double[] getForecast() {
         return forecast;
     }
 
     @ApiModelProperty(required = true)
     @XmlElement(name = "score", required = true)
+    @JsonProperty(value = "Score")
     public double[] getScore() {
         return score;
     }
 
     @ApiModelProperty(required = true)
     @XmlElement(name = "value", required = true)
+    @JsonProperty(value = "Value")
     public double[] getValue() {
         return value;
     }
 
     @ApiModelProperty(required = true)
     @XmlElement(name = "name", nillable = false, required = true)
+    @JsonProperty(value = "Name")
     public String getName() {
         return name;
     }
 
+    @JsonProperty(value = "Name")
     public void setName(String name) {
         this.name = name;
     }
 
+    @JsonProperty(value = "Forecast")
     public void setForecast(double[] forecast) {
         this.forecast = forecast;
     }
 
+    @JsonProperty(value = "Score")
     public void setScore(double[] score) {
         this.score = score;
     }
 
+    @JsonProperty(value = "Value")
     public void setValue(double[] value) {
         this.value = value;
     }

@@ -14,11 +14,10 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package ec.nbb.demetra.rest.terror.test;
+package ec.nbb.demetra.rest.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
-import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import ec.nbb.demetra.model.balancing.Summary;
 import io.swagger.util.Json;
 import java.io.BufferedInputStream;
@@ -36,10 +35,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Variant;
 import org.glassfish.grizzly.compression.zip.GZipDecoder;
+import org.glassfish.grizzly.compression.zip.GZipFilter;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.message.GZipEncoder;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -53,26 +54,53 @@ public class BalancingTest {
         InputStream fs = null;
         GZIPInputStream stream = null;
         try {
-            fs = new FileInputStream("C:\\LocalData\\MAGGIMA\\yearly_summary2.gz");
+            fs = new FileInputStream("R:\\RES\\TRICONAT\\QSUT\\constraints.gz");
             stream = new GZIPInputStream(fs);
 
             JerseyClientBuilder jcb = new JerseyClientBuilder();
             jcb.register(GZipDecoder.class);
             jcb.register(GZipEncoder.class);
-            jcb.register(GZIPContentEncodingFilter.class);
+            jcb.register(GZipFilter.class);
             JerseyClient jc = jcb.build();
 
             Stopwatch watch = Stopwatch.createStarted();
-            //JerseyWebTarget jwt = jc.target("http://localhost:9998/demetra/api");
-            JerseyWebTarget jwt = jc.target("https://pc0021770.nbb.local:8181/demetra/api"); // Needs installation of certificate
+            JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
+            //JerseyWebTarget jwt = jc.target("https://pc0021770.nbb.local:8181/demetra/api"); // Needs installation of certificate
             Response resp = jwt.path("balancing")
                     .request(MediaType.APPLICATION_JSON)
                     .acceptEncoding("gzip")
                     .post(Entity.entity(stream, new Variant(MediaType.APPLICATION_JSON_TYPE, (String) null, "gzip")));
-            if (resp.getStatus() == 200) {
-                Summary summary = resp.readEntity(Summary.class);
-                System.out.println("Nouvelles dimensions : " + summary.getDimensionsCount() + "\nTime elapsed : " +watch.stop().elapsed(TimeUnit.MILLISECONDS));
-            }
+
+            Assert.assertEquals(200, resp.getStatus());
+
+            Summary summary = resp.readEntity(Summary.class);
+
+            Summary data = new Summary();
+            data.setDimensions(summary.getDimensions());
+            data.setDimensionsCount(summary.getDimensionsCount());
+            data.setData(summary.getData());
+
+            Summary constraints = new Summary();
+            constraints.setConstraints(summary.getConstraints());
+            constraints.setDimensions(summary.getDimensions());
+            constraints.setDimensionsCount(summary.getDimensionsCount());
+            
+            Summary references = new Summary();
+            references.setDimensions(summary.getDimensions());
+            references.setDimensionsCount(summary.getDimensionsCount());
+            references.setReferences(summary.getReferences());
+
+            FileOutputStream fos = new FileOutputStream("R:\\RES\\TRICONAT\\QSUT\\Balancing\\Test\\Pretty Print\\constraints_2010.json");
+            Json.pretty().writeValue(fos, constraints);
+            fos.close();
+
+            fos = new FileOutputStream("R:\\RES\\TRICONAT\\QSUT\\Balancing\\Test\\Pretty Print\\data_2010.json");
+            Json.pretty().writeValue(fos, data);
+            fos.close();
+            
+            fos = new FileOutputStream("R:\\RES\\TRICONAT\\QSUT\\Balancing\\Test\\Pretty Print\\references_2010.json");
+            Json.pretty().writeValue(fos, references);
+            fos.close();
         } catch (IOException | NullPointerException ex) {
             ex.printStackTrace();
             Logger.getLogger(BalancingTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -87,7 +115,7 @@ public class BalancingTest {
         }
     }
 
-    @Test
+    //@Test
     public void readFile() {
         GZIPInputStream stream = null;
         FileInputStream fs = null;

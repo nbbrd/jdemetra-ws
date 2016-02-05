@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 National Bank of Belgium
+ * Copyright 2014 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or – as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -14,26 +14,19 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package ec.nbb.demetra.exception;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+package ec.nbb.demetra.rest.test;
 
 /**
  *
  * @author Mats Maggi
  */
-@Provider
-public class DemetraExceptionMapper implements ExceptionMapper<Throwable> {
+public class TestConfig {
+    private static final boolean isLocal = true;
     
-    @Override
-    public Response toResponse(Throwable exception) {
-        exception.printStackTrace();
-        
-        return Response.status(Status.INTERNAL_SERVER_ERROR)
-                .entity(exception.getMessage()).type(MediaType.TEXT_PLAIN).build();
+    public static final String LOCAL_URL = "http://localhost:9998/demetra/api";
+    public static final String REMOTE_URL = "http://srvdqrdd2.nbb.local:9998/demetra/api";
+    
+    public static String getUrl() {
+        return isLocal ? LOCAL_URL : REMOTE_URL;
     }
 }

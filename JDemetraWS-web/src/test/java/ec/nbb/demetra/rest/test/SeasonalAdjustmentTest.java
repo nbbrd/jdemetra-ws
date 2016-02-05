@@ -14,11 +14,17 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package ec.nbb.demetra.rest.terror.test;
+package ec.nbb.demetra.rest.test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ec.nbb.demetra.model.outlier.ShadowTs;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
+import ec.tss.TsCollectionInformation;
+import ec.tss.TsInformation;
+import ec.tss.TsInformationType;
+import ec.tss.TsMoniker;
+import ec.tss.xml.XmlTs;
+import ec.tss.xml.XmlTsCollection;
 import ec.tstoolkit.timeseries.TsAggregationType;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
@@ -31,6 +37,7 @@ import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.message.GZipEncoder;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -40,26 +47,65 @@ import org.junit.Test;
 public class SeasonalAdjustmentTest {
 
     @Test
-    public void outlierNewTest() throws JsonProcessingException {
+    public void seasonalAdjustment() throws JsonProcessingException {
         TsData d = TsData.random(TsFrequency.Monthly);
         ShadowTs ts = RestUtils.toShadowTs("Blabla", d);
         ts.setAggregationMethod(TsAggregationType.None);
         ts.setFreq(12);
 
+        Response resp = callWS(ts);
+        
+        Assert.assertEquals(200, resp.getStatus());
+        
+        List<ShadowTs> list = resp.readEntity(new GenericType<List<ShadowTs>>(){});
+        Assert.assertNotNull(list);
+    }
+    
+    @Test
+    public void seasonalAdjustmentWithXml() throws JsonProcessingException {
+        TsData d = TsData.random(TsFrequency.Monthly);
+        XmlTs ts = new XmlTs();
+        TsInformation info = new TsInformation("Blabla", new TsMoniker(), TsInformationType.All);
+        info.data = d;
+        ts.copy(info);
+
+        Response resp = callWSWithXml(ts);
+        
+        Assert.assertEquals(200, resp.getStatus());
+        
+        XmlTsCollection list = resp.readEntity(XmlTsCollection.class);
+        Assert.assertNotNull(list);
+        TsCollectionInformation collInfo = list.create();
+        System.out.println(collInfo.items.size());
+    }
+    
+    public Response callWS(ShadowTs ts) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
-        JerseyWebTarget jwt = jc.target("http://localhost:9998/demetra/api");
-        //JerseyWebTarget jwt = jc.target("https://pc0021770.nbb.local:8181/demetra/api"); // Needs installation of certificate
-        Response resp = jwt.path("sa/x13/RSA4c")
+        JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
+        Response resp = jwt.path("sa/x13")
+                .queryParam("spec", "RSA4c")
                 .request(MediaType.APPLICATION_JSON)
                 .acceptEncoding("gzip")
                 .post(Entity.entity(ts, MediaType.APPLICATION_JSON));
-        if (resp.getStatus() == 200) {
-            List<ShadowTs> list = resp.readEntity(new GenericType<List<ShadowTs>>(){});
-            System.out.println(list.size());
-        }
-            
+        
+        return resp;
+    }
+    
+    public Response callWSWithXml(XmlTs ts) {
+        JerseyClientBuilder jcb = new JerseyClientBuilder();
+        jcb.register(GZipEncoder.class);
+        JerseyClient jc = jcb.build();
+
+        JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
+        Response resp = jwt.path("sa/xml/x13")
+                .queryParam("spec", "RSA4c")
+                .request(MediaType.APPLICATION_XML)
+                .acceptEncoding("gzip")
+                .post(Entity.entity(ts, MediaType.APPLICATION_XML));
+        
+        return resp;
     }
 }

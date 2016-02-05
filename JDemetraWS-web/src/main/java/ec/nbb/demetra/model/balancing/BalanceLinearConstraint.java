@@ -24,53 +24,77 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class BalanceLinearConstraint {
 
-    @JsonProperty(value = "Identifier")
+    @JsonProperty(value = "Id")
     private String identifier;
-    @JsonProperty(value = "Target")
+    @JsonProperty(value = "Tgt")
     private double target;
-    @JsonProperty(value = "Mode")
+    @JsonProperty(value = "M")
     private String mode;
-    @JsonProperty(value = "Elements")
+    @JsonProperty(value = "Els")
     private BalanceLinearConstraintElement[] elements;
+    @JsonProperty(value = "P")
+    private int priority;
+    @JsonProperty(value = "W")
+    private double weigth;
 
-    @JsonProperty(value = "Identifier")
+    @JsonProperty(value = "Id")
     public String getIdentifier() {
         return identifier;
     }
 
-    @JsonProperty(value = "Identifier")
+    @JsonProperty(value = "Id")
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
 
-    @JsonProperty(value = "Target")
+    @JsonProperty(value = "Tgt")
     public double getTarget() {
         return target;
     }
 
-    @JsonProperty(value = "Target")
+    @JsonProperty(value = "Tgt")
     public void setTarget(double target) {
         this.target = target;
     }
 
-    @JsonProperty(value = "Mode")
+    @JsonProperty(value = "M")
     public String getMode() {
         return mode;
     }
 
-    @JsonProperty(value = "Mode")
+    @JsonProperty(value = "M")
     public void setMode(String mode) {
         this.mode = mode;
     }
 
-    @JsonProperty(value = "Elements")
+    @JsonProperty(value = "Els")
     public BalanceLinearConstraintElement[] getElements() {
         return elements;
     }
 
-    @JsonProperty(value = "Elements")
+    @JsonProperty(value = "Els")
     public void setElements(BalanceLinearConstraintElement[] elements) {
         this.elements = elements;
     }
 
+    @JsonProperty(value = "P")
+    public int getPriority() {
+        return priority;
+    }
+
+    @JsonProperty(value = "P")
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    @JsonProperty(value = "W")
+    public double getWeigth() {
+        return weigth;
+    }
+
+    @JsonProperty(value = "W")
+    public void setWeigth(double weigth) {
+        this.weigth = weigth;
+    }
+ 
 }

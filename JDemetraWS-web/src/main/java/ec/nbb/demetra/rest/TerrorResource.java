@@ -104,7 +104,7 @@ public class TerrorResource {
                 @ApiResponse(code = 500, message = "Invalid request", response = String.class)
             }
     )
-    public Response terror(@ApiParam(name = "TerrorRequest", required = true) XmlInformationSet request) {
+    public Response terrorXml(@ApiParam(name = "TerrorRequest", required = true) XmlInformationSet request) {
         String spec = null;
         try {
             InformationSet set = request.create();

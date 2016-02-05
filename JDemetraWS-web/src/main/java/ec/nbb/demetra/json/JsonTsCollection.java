@@ -26,39 +26,33 @@ import ec.tss.TsInformationType;
 import ec.tss.TsMoniker;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 /**
  *
  * @author Mats Maggi
  */
-@XmlRootElement(name = "tsCollection")
-@XmlType(name = "tsCollectionType")
 public class JsonTsCollection implements IJsonConverter<TsCollectionInformation> {
-
-    @XmlAttribute
     public String name;
-    
-    @XmlAttribute
     public String source;
-    
-    @XmlAttribute
     public String identifier;
     
-    @XmlElement(name = "ts")
-    @XmlElementWrapper(name = "data")
     @JsonDeserialize(as=ArrayList.class, contentAs=JsonTs.class)
     public List<JsonTs> ts;
+    
+    public JsonMetaData metadata;
 
     @Override
     public void from(TsCollectionInformation t) {
         source = t.moniker.getSource();
         identifier = t.moniker.getId();
         name = t.name;
+        
+        if (t.metaData == null || t.metaData.isEmpty())
+	    metadata = null;
+	else {
+	    metadata = new JsonMetaData();
+	    metadata.from(t.metaData);
+	}
 
         int n = t.items.size();
         if (n > 0) {
@@ -78,6 +72,10 @@ public class JsonTsCollection implements IJsonConverter<TsCollectionInformation>
         TsCollectionInformation cinfo = new TsCollectionInformation(moniker,
                 TsInformationType.UserDefined);
         cinfo.name = name;
+        
+        if (metadata != null)
+	    cinfo.metaData = metadata.create();
+        
         if (ts != null) {
             for (int i = 0; i < ts.size(); ++i) {
                 cinfo.items.add(ts.get(i).to());

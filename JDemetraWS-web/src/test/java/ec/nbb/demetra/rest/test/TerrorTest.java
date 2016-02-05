@@ -14,7 +14,7 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package ec.nbb.demetra.rest.terror.test;
+package ec.nbb.demetra.rest.test;
 
 import com.google.common.base.Stopwatch;
 import ec.nbb.demetra.rest.model.TerrorRequest;
@@ -31,6 +31,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -59,11 +60,14 @@ public class TerrorTest {
         Stopwatch stopwatch = Stopwatch.createStarted();
        
         Client client = ClientBuilder.newClient();
-        //WebResource service = client.resource("http://srvdqrdd2.nbb.local:9998/demetra/api");
-        WebTarget service = client.target("http://localhost:8080/demetra/api");
+        
+        WebTarget service = client.target(TestConfig.getUrl());
         TerrorResults resp = service.path("terror")
                 .request(MediaType.APPLICATION_XML)
                 .post(Entity.entity(input, MediaType.APPLICATION_XML), TerrorResults.class);
+        
+        Assert.assertNotNull(resp);
+        
         System.out.println(resp.getCount());
         System.out.println(stopwatch.stop().toString());
         

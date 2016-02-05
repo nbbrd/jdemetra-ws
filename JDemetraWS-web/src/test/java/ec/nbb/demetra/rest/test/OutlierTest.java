@@ -14,10 +14,9 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package ec.nbb.demetra.rest.terror.test;
+package ec.nbb.demetra.rest.test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.base.Stopwatch;
 import ec.nbb.demetra.json.JsonTsCollection;
 import ec.nbb.demetra.model.outlier.OutlierRequest;
 import ec.nbb.demetra.model.outlier.OutlierResults;
@@ -39,10 +38,12 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import jersey.repackaged.com.google.common.base.Stopwatch;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.message.GZipEncoder;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -109,12 +110,13 @@ public class OutlierTest {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
         Client client = ClientBuilder.newClient();
-        //WebResource service = client.resource("http://srvdqrdd2.nbb.local:9998/demetra/api");
-        WebTarget service = client.target("http://localhost:8080/demetra/api");
+        
+        WebTarget service = client.target(TestConfig.getUrl());
 
         OutlierResults resp = service.path("outlier")
                 .request(MediaType.APPLICATION_JSON)
                 .post(Entity.entity(input, MediaType.APPLICATION_JSON), OutlierResults.class);
+        Assert.assertNotNull(resp);
         System.out.println(stopwatch.stop().toString());
     }
 

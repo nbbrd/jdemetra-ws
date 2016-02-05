@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 National Bank of Belgium
+ * Copyright 2014 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or – as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -14,26 +14,18 @@
  * See the Licence for the specific language governing permissions and 
  * limitations under the Licence.
  */
-package ec.nbb.demetra.exception;
+package ec.nbb.demetra.json.benchmarking;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import ec.nbb.demetra.json.JsonTsData;
+import ec.tstoolkit.timeseries.TsAggregationType;
 
 /**
  *
  * @author Mats Maggi
  */
-@Provider
-public class DemetraExceptionMapper implements ExceptionMapper<Throwable> {
-    
-    @Override
-    public Response toResponse(Throwable exception) {
-        exception.printStackTrace();
-        
-        return Response.status(Status.INTERNAL_SERVER_ERROR)
-                .entity(exception.getMessage()).type(MediaType.TEXT_PLAIN).build();
-    }
+public class JsonSsfDentonProcessing {
+
+    public JsonTsData x, y;
+    public boolean mul = true;
+    public TsAggregationType agg = TsAggregationType.Sum;
 }

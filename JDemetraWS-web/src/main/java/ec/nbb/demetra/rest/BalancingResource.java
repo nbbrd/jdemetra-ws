@@ -23,12 +23,13 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.ConnectionCallback;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -39,9 +40,6 @@ import javax.ws.rs.core.Response;
 @Path("/balancing")
 @Api(value = "/balancing")
 public class BalancingResource {
-
-    @Context
-    private HttpServletRequest httpRequest;
 
     @POST
     @Compress
@@ -55,8 +53,23 @@ public class BalancingResource {
                 @ApiResponse(code = 500, message = "Invalid request", response = String.class)
             }
     )
-    public Response balancing(Summary s) throws IOException {
+    public void balancing(final Summary s, @Suspended final AsyncResponse response)
+            throws IOException {
         // TODO : Call SAS balancing
-        return Response.status(Response.Status.OK).entity(s).build();
+        response.register(new ConnectionCallback() {
+            @Override
+            public void onDisconnect(AsyncResponse disconnected) {
+                response.resume(Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                        .entity("Connection lost").build());
+            }
+        });
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                response.resume(Response.status(Response.Status.OK).entity(s).build());
+            }
+        }).start();
+
     }
 }

@@ -24,75 +24,75 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class BalanceLinearConstraintElement {
 
-    @JsonProperty(value = "Period")
+    @JsonProperty(value = "Per")
     private int period;
-    @JsonProperty(value = "Branch")
+    @JsonProperty(value = "Br")
     private String branch;
-    @JsonProperty(value = "Product")
+    @JsonProperty(value = "Prd")
     private String product;
-    @JsonProperty(value = "Flow")
+    @JsonProperty(value = "F")
     private char flow;
-    @JsonProperty(value = "Variable")
+    @JsonProperty(value = "Var")
     private char variable;
-    @JsonProperty(value = "Factor")
+    @JsonProperty(value = "Fct")
     private double factor;
 
-    @JsonProperty(value = "Period")
+    @JsonProperty(value = "Per")
     public int getPeriod() {
         return period;
     }
 
-    @JsonProperty(value = "Period")
+    @JsonProperty(value = "Per")
     public void setPeriod(int period) {
         this.period = period;
     }
 
-    @JsonProperty(value = "Branch")
+    @JsonProperty(value = "Br")
     public String getBranch() {
         return branch;
     }
 
-    @JsonProperty(value = "Branch")
+    @JsonProperty(value = "Br")
     public void setBranch(String branch) {
         this.branch = branch;
     }
 
-    @JsonProperty(value = "Product")
+    @JsonProperty(value = "Prd")
     public String getProduct() {
         return product;
     }
 
-    @JsonProperty(value = "Product")
+    @JsonProperty(value = "Prd")
     public void setProduct(String product) {
         this.product = product;
     }
 
-    @JsonProperty(value = "Flow")
+    @JsonProperty(value = "F")
     public char getFlow() {
         return flow;
     }
 
-    @JsonProperty(value = "Flow")
+    @JsonProperty(value = "F")
     public void setFlow(char flow) {
         this.flow = flow;
     }
 
-    @JsonProperty(value = "Variable")
+    @JsonProperty(value = "Var")
     public char getVariable() {
         return variable;
     }
 
-    @JsonProperty(value = "Variable")
+    @JsonProperty(value = "Var")
     public void setVariable(char variable) {
         this.variable = variable;
     }
 
-    @JsonProperty(value = "Factor")
+    @JsonProperty(value = "Fct")
     public double getFactor() {
         return factor;
     }
 
-    @JsonProperty(value = "Factor")
+    @JsonProperty(value = "Fct")
     public void setFactor(double factor) {
         this.factor = factor;
     }
