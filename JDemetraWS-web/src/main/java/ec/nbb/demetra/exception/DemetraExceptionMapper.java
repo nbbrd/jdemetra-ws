@@ -32,7 +32,7 @@ public class DemetraExceptionMapper implements ExceptionMapper<Throwable> {
     @Override
     public Response toResponse(Throwable exception) {
         exception.printStackTrace();
-        
+        System.out.println("[ERROR] " + exception.getMessage());
         return Response.status(Status.INTERNAL_SERVER_ERROR)
                 .entity(exception.getMessage()).type(MediaType.TEXT_PLAIN).build();
     }

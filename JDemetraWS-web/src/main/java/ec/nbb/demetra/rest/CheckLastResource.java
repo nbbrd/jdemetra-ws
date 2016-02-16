@@ -16,15 +16,19 @@
  */
 package ec.nbb.demetra.rest;
 
+import com.google.common.base.Strings;
 import ec.nbb.demetra.filter.Compress;
 import ec.nbb.demetra.model.outlier.ShadowTs;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
 import ec.nbb.demetra.rest.model.TerrorResult;
 import ec.satoolkit.tramoseats.TramoSeatsSpecification;
 import ec.satoolkit.x13.X13Specification;
+import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.algorithm.ProcessingContext;
 import ec.tstoolkit.modelling.arima.CheckLast;
 import ec.tstoolkit.modelling.arima.IPreprocessor;
+import ec.tstoolkit.modelling.arima.tramo.TramoSpecification;
+import ec.tstoolkit.timeseries.simplets.TsData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -46,8 +50,8 @@ import javax.ws.rs.core.Response;
  */
 @Path("/checklast")
 @Api(value = "/checklast")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class CheckLastResource {
 
     @POST
@@ -110,5 +114,48 @@ public class CheckLastResource {
         }
 
         return Response.ok().entity(results).build();
+    }
+
+    @POST
+    @Path("/com")
+    @Compress
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Process a check last on a given Ts", notes = "Creates a check last processing.", response = TerrorResult.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "Successful processing of check last", response = TerrorResult.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response checkLastNew(
+            @ApiParam(name = "ts", required = true) XmlTsData ts,
+            @ApiParam(name = "nbLast", required = true) @QueryParam("nbLast") int nbLast,
+            @ApiParam(name = "spec", defaultValue = "TRfull") @QueryParam("spec") String spec) {
+        if (ts == null) {
+            throw new IllegalArgumentException("Given Ts is null !");
+        }
+
+        if (nbLast <= 0) {
+            throw new IllegalArgumentException("NbLast parameter must be > 0");
+        }
+
+        if (Strings.isNullOrEmpty(spec)) {
+            spec = "TRfull";
+        }
+
+        TsData input = ts.create();
+        IPreprocessor p = TramoSpecification.defaultPreprocessor(
+                TramoSpecification.Default.valueOf(spec));
+        CheckLast cl = new CheckLast(p);
+        cl.setBackCount(nbLast);
+        if (cl.check(input)) {
+            TerrorResult result = new TerrorResult("CheckLast", cl.getValues(), 
+                    cl.getForecastsValues(), cl.getScores());
+            return Response.ok().entity(result).build();
+        } else {
+            return Response.serverError().entity("Unable to process the Check Last !").build();
+        }
     }
 }

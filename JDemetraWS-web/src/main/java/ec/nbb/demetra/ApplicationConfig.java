@@ -49,7 +49,10 @@ public class ApplicationConfig extends Application {
         resources.add(ec.nbb.demetra.rest.CheckLastResource.class);
         resources.add(ec.nbb.demetra.rest.TestXmlResource.class);        
         resources.add(ec.nbb.demetra.rest.BenchmarkingResource.class);
-
+        resources.add(ec.nbb.demetra.rest.TramoSeatsResource.class);
+        resources.add(ec.nbb.demetra.rest.X13Resource.class);
+        resources.add(ec.nbb.demetra.rest.DummyResource.class);
+        resources.add(ec.nbb.demetra.rest.HodrickPrescottResource.class);
 
         return resources;
     }

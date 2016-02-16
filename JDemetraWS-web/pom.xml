@@ -52,11 +52,6 @@
             <artifactId>jersey-client</artifactId>
             <version>${version.jersey}</version>
         </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-grizzly2-http</artifactId>
-            <version>2.21</version>
-        </dependency>
 
         <dependency>
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
@@ -109,73 +104,14 @@
         </dependency>
         
         <dependency>
-            <groupId>org.glassfish.grizzly</groupId>
-            <artifactId>grizzly-http</artifactId>
-            <version>2.3.22</version>
-        </dependency>
-        
-        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>${version.javax-servlet}</version>
         </dependency>
-
     </dependencies>
-    
-    <profiles>
-        <profile>
-            <id>appassembler</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <!-- Generate both Windows and Linux bash shell execution scripts -->
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>appassembler-maven-plugin</artifactId>
-                        <version>1.10</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>assemble</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <repositoryLayout>flat</repositoryLayout>
-                            <useWildcardClassPath>true</useWildcardClassPath>
-                            <!-- Set the target configuration directory to be used in the bin scripts -->
-                            <configurationDirectory>conf</configurationDirectory>
-                            <!-- Copy the contents from "/src/main/config" to the target
-                            configuration directory in the assembled application -->
-                            <copyConfigurationDirectory>true</copyConfigurationDirectory>
-                            <!-- Include the target configuration directory in the beginning of
-                            the classpath declaration in the bin scripts -->                    
-                            <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
-
-                            <!-- Extra JVM arguments that will be included in the bin scripts -->
-                            <extraJvmArguments>-Xmx1024m</extraJvmArguments>
-
-                            <programs>
-                                <program>
-                                    <id>start</id>
-                                    <mainClass>ec.nbb.demetra.standalone.Main</mainClass>
-                                    <name>start</name>
-                                </program>
-                            </programs>
-                            <binFileExtensions>
-                                <unix>.sh</unix>
-                            </binFileExtensions>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <build>
-        <finalName>demetra</finalName>
+        <finalName>${project.name}-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -194,6 +130,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.3</version>
                 <configuration>
+                    <attachClasses>true</attachClasses>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
@@ -222,6 +159,47 @@
                     </execution>
                 </executions>
             </plugin>
+            
+            <!--<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <createDependencyReducedPom>true</createDependencyReducedPom>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+ 
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                                <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>ec.nbb.demetra.standalone.Main</Main-Class>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>-->
+
         </plugins>
     </build>
 </project>

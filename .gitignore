@@ -1,3 +1,5 @@
 /JDemetraWS-ear/target/
 /JDemetraWS-web/target/
 /Terror/target/
+/JDemetraWS-standalone/target/
+/JDemetraWS-standalone/dependency-reduced-pom.xml

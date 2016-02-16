@@ -7,8 +7,8 @@
   <packaging>pom</packaging>
   <name>JDemetraWS</name>
   <modules>
-    <module>JDemetraWS-ear</module>
     <module>JDemetraWS-web</module>
     <module>Terror</module>
+    <module>JDemetraWS-standalone</module>
   </modules>
 </project>

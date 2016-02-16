@@ -84,11 +84,6 @@ public class BalancingTest {
             constraints.setConstraints(summary.getConstraints());
             constraints.setDimensions(summary.getDimensions());
             constraints.setDimensionsCount(summary.getDimensionsCount());
-            
-            Summary references = new Summary();
-            references.setDimensions(summary.getDimensions());
-            references.setDimensionsCount(summary.getDimensionsCount());
-            references.setReferences(summary.getReferences());
 
             FileOutputStream fos = new FileOutputStream("R:\\RES\\TRICONAT\\QSUT\\Balancing\\Test\\Pretty Print\\constraints_2010.json");
             Json.pretty().writeValue(fos, constraints);
@@ -96,10 +91,6 @@ public class BalancingTest {
 
             fos = new FileOutputStream("R:\\RES\\TRICONAT\\QSUT\\Balancing\\Test\\Pretty Print\\data_2010.json");
             Json.pretty().writeValue(fos, data);
-            fos.close();
-            
-            fos = new FileOutputStream("R:\\RES\\TRICONAT\\QSUT\\Balancing\\Test\\Pretty Print\\references_2010.json");
-            Json.pretty().writeValue(fos, references);
             fos.close();
         } catch (IOException | NullPointerException ex) {
             ex.printStackTrace();
