@@ -16,6 +16,7 @@
  */
 package ec.nbb.demetra.rest;
 
+import ec.nbb.demetra.Messages;
 import ec.nbb.demetra.filter.Compress;
 import ec.nbb.demetra.json.JsonTsPeriod;
 import ec.nbb.demetra.model.outlier.Outlier;
@@ -90,7 +91,7 @@ public class AnomalyDetectionResource {
                 r.setName(name);
 
                 if (tsData == null || tsData.getLength() == 0) {
-                    r.setStatus("NoData");
+                    r.setStatus(Messages.TS_EMPTY);
                 } else {
                     OutlierEstimation[] oe;
                     PreprocessingModel model = processor.process(tsData, null);
@@ -115,7 +116,7 @@ public class AnomalyDetectionResource {
                             r.setStatus("NoOutliers");
                         }
                     } else {
-                        r.setStatus("Failed");
+                        r.setStatus(Messages.PROCESSING_ERROR);
                     }
                 }
                 results.add(r);
@@ -146,7 +147,7 @@ public class AnomalyDetectionResource {
             case "TRfull":
                 return TramoSpecification.TRfull;
             default:
-                throw new IllegalArgumentException("Unable to find a spec with name : " + spec);
+                throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, spec));
         }
 
     }
@@ -167,7 +168,7 @@ public class AnomalyDetectionResource {
         }
 
         if (spec.getOutliers().getTypes().length == 0) {
-            throw new IllegalArgumentException("At least one outlier type must be shown");
+            throw new IllegalArgumentException(Messages.NO_OUTLIERS_TYPE);
         }
     }
 

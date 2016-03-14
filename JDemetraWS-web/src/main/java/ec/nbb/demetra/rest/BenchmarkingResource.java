@@ -20,12 +20,14 @@ import ec.benchmarking.simplets.TsCholette;
 import ec.benchmarking.simplets.TsDenton;
 import ec.benchmarking.simplets.TsDenton2;
 import ec.benchmarking.simplets.TsExpander;
+import ec.benchmarking.simplets.TsExpander.Model;
+import ec.nbb.demetra.Messages;
 import ec.nbb.demetra.filter.Compress;
-import ec.nbb.demetra.json.JsonTsData;
 import ec.nbb.demetra.json.benchmarking.JsonCholetteProcessing;
 import ec.nbb.demetra.json.benchmarking.JsonDentonProcessing;
 import ec.nbb.demetra.json.benchmarking.JsonExpanderProcessing;
 import ec.nbb.demetra.json.benchmarking.JsonSsfDentonProcessing;
+import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
 import io.swagger.annotations.Api;
@@ -55,10 +57,10 @@ public class BenchmarkingResource {
     @Path("/denton")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Denton processing", notes = "Computes a Denton Processing on a given series", response = JsonTsData.class)
+    @ApiOperation(value = "Denton processing", notes = "Computes a Denton Processing on a given series", response = XmlTsData.class)
     @ApiResponses(
             value = {
-                @ApiResponse(code = 200, message = "Denton processing successfully done", response = JsonTsData.class),
+                @ApiResponse(code = 200, message = "Denton processing successfully done", response = XmlTsData.class),
                 @ApiResponse(code = 400, message = "Bad request", response = String.class),
                 @ApiResponse(code = 500, message = "Invalid request", response = String.class)
             }
@@ -72,17 +74,17 @@ public class BenchmarkingResource {
         
         TsData xbench;
         if (dp.x == null) {
-            denton.setDefaultFrequency(dp.defaultFrequency);
+            denton.setDefaultFrequency(TsFrequency.valueOf(dp.defaultFrequency));
             xbench = denton.process(null, dp.y.create());
         } else {
             xbench = denton.process(dp.x.create(), dp.y.create());
         }
         if (xbench != null) {
-            JsonTsData result = new JsonTsData();
-            result.from(xbench);
+            XmlTsData result = new XmlTsData();
+            result.copy(xbench);
             return Response.ok().entity(result).build();
         } else {
-            throw new IllegalArgumentException("Denton processing returned a null result !");
+            throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
         }
     }
 
@@ -91,10 +93,10 @@ public class BenchmarkingResource {
     @Path("/ssfdenton")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Ssf Denton processing", notes = "Computes a Ssf Denton Processing on a given series", response = JsonTsData.class)
+    @ApiOperation(value = "Ssf Denton processing", notes = "Computes a Ssf Denton Processing on a given series", response = XmlTsData.class)
     @ApiResponses(
             value = {
-                @ApiResponse(code = 200, message = "Ssf Denton processing successfully done", response = JsonTsData.class),
+                @ApiResponse(code = 200, message = "Ssf Denton processing successfully done", response = XmlTsData.class),
                 @ApiResponse(code = 400, message = "Bad request", response = String.class),
                 @ApiResponse(code = 500, message = "Invalid request", response = String.class)
             }
@@ -106,11 +108,11 @@ public class BenchmarkingResource {
         TsData xbench = denton.process(dp.x.create(), dp.y.create());
 
         if (xbench != null) {
-            JsonTsData result = new JsonTsData();
-            result.from(xbench);
+            XmlTsData result = new XmlTsData();
+            result.copy(xbench);
             return Response.ok().entity(result).build();
         } else {
-            throw new IllegalArgumentException("Ssf Denton processing returned a null result !");
+            throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
         }
     }
 
@@ -119,10 +121,10 @@ public class BenchmarkingResource {
     @Path("/cholette")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Cholette processing", notes = "Computes a Cholette Processing on a given series", response = JsonTsData.class)
+    @ApiOperation(value = "Cholette processing", notes = "Computes a Cholette Processing on a given series", response = XmlTsData.class)
     @ApiResponses(
             value = {
-                @ApiResponse(code = 200, message = "Cholette processing successfully done", response = JsonTsData.class),
+                @ApiResponse(code = 200, message = "Cholette processing successfully done", response = XmlTsData.class),
                 @ApiResponse(code = 400, message = "Bad request", response = String.class),
                 @ApiResponse(code = 500, message = "Invalid request", response = String.class)
             }
@@ -132,15 +134,15 @@ public class BenchmarkingResource {
         cholette.setAggregationType(cho.agg);
         cholette.setRho(cho.rho);
         cholette.setLambda(cho.lambda);
-        cholette.setBiasCorrection(cho.bias);
+        cholette.setBiasCorrection(TsCholette.BiasCorrection.valueOf(cho.bias));
         TsData xbench = cholette.process(cho.x.create(), cho.y.create());
 
         if (xbench != null) {
-            JsonTsData result = new JsonTsData();
-            result.from(xbench);
+            XmlTsData result = new XmlTsData();
+            result.copy(xbench);
             return Response.ok().entity(result).build();
         } else {
-            throw new IllegalArgumentException("Cholette processing returned a null result !");
+            throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
         }
     }
 
@@ -149,18 +151,18 @@ public class BenchmarkingResource {
     @Path("/expander")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Expander processing", notes = "Computes a Expander Processing on a given series", response = JsonTsData.class)
+    @ApiOperation(value = "Expander processing", notes = "Computes a Expander Processing on a given series", response = XmlTsData.class)
     @ApiResponses(
             value = {
-                @ApiResponse(code = 200, message = "Expander processing successfully done", response = JsonTsData.class),
+                @ApiResponse(code = 200, message = "Expander processing successfully done", response = XmlTsData.class),
                 @ApiResponse(code = 400, message = "Bad request", response = String.class),
                 @ApiResponse(code = 500, message = "Invalid request", response = String.class)
             }
     )
-    public Response choletteProcessing(@ApiParam(value = "expander", required = true) JsonExpanderProcessing exp) {
+    public Response expanderProcessing(@ApiParam(value = "expander", required = true) JsonExpanderProcessing exp) {
         TsExpander expander = new TsExpander();
         expander.setType(exp.agg);
-        expander.setModel(exp.model);
+        expander.setModel(Model.valueOf(exp.model));
         if (exp.useparam) {
             expander.setParameter(exp.parameter);
             expander.estimateParameter(false);
@@ -178,11 +180,11 @@ public class BenchmarkingResource {
         }
 
         if (xbench != null) {
-            JsonTsData result = new JsonTsData();
-            result.from(xbench);
+            XmlTsData result = new XmlTsData();
+            result.copy(xbench);
             return Response.ok().entity(result).build();
         } else {
-            throw new IllegalArgumentException("Expander processing returned a null result !");
+            throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
         }
     }
 }

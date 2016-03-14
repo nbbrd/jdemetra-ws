@@ -16,6 +16,7 @@
  */
 package ec.nbb.demetra.rest;
 
+import ec.nbb.demetra.Messages;
 import ec.nbb.demetra.filter.Compress;
 import ec.nbb.demetra.model.outlier.ShadowTs;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
@@ -103,7 +104,7 @@ public class ForecastingResource {
                 model = sx.buildPreprocessor().process(tsData, null);
                 break;
             default:
-                throw new IllegalArgumentException("Unrecognized algoritm (" + algorithm + ") !");
+                throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, algorithm));
         }
 
         if (model != null) {

@@ -16,9 +16,8 @@
  */
 package ec.nbb.demetra.json.benchmarking;
 
-import ec.benchmarking.simplets.TsExpander;
-import ec.nbb.demetra.json.JsonTsData;
-import ec.nbb.demetra.json.JsonTsDomain;
+import ec.tss.xml.XmlTsData;
+import ec.tss.xml.XmlTsDomain;
 import ec.tstoolkit.timeseries.TsAggregationType;
 
 /**
@@ -27,14 +26,14 @@ import ec.tstoolkit.timeseries.TsAggregationType;
  */
 public class JsonExpanderProcessing {
 
-    public JsonTsData y;
+    public XmlTsData y;
     public int defaultFrequency; // only used when domain == null 
-    public JsonTsDomain domain;
+    public XmlTsDomain domain;
     public boolean useparam = false;
     public double parameter = .9;
     public boolean trend = false;
     public boolean constant = false;
-    public TsExpander.Model model = TsExpander.Model.I1;
+    public String model = "I1";
 
     public int differencing = 1; // >=1, <=5 
     public TsAggregationType agg = TsAggregationType.Sum;

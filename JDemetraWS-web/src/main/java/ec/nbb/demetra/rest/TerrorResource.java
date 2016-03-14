@@ -16,9 +16,10 @@
  */
 package ec.nbb.demetra.rest;
 
-import ec.nbb.demetra.rest.model.TerrorRequest;
-import ec.nbb.demetra.rest.model.TerrorResult;
-import ec.nbb.demetra.rest.model.TerrorResults;
+import ec.nbb.demetra.Messages;
+import ec.nbb.demetra.model.terror.TerrorRequest;
+import ec.nbb.demetra.model.terror.TerrorResult;
+import ec.nbb.demetra.model.terror.TerrorResults;
 import ec.tss.Ts;
 import ec.tss.TsCollection;
 import ec.tss.TsCollectionInformation;
@@ -69,11 +70,11 @@ public class TerrorResource {
             int nbLast = request.getNbLast();
 
             if (nbLast <= 0) {
-                throw new Exception("NbLast parameter must be > 0");
+                throw new Exception(Messages.POSITIVE_NB_LAST);
             }
 
             if (tsCollection == null || tsCollection.getCount() == 0) {
-                throw new Exception("At least one Ts must be provided !");
+                throw new Exception(Messages.NO_SERIES);
             }
 
             for (Ts ts : tsCollection) {
@@ -86,7 +87,7 @@ public class TerrorResource {
             }
             return Response.status(Status.OK).entity(results).build();
         } catch (IllegalArgumentException e) {
-            return Response.status(Status.BAD_REQUEST).entity("Could not find a default specification from : " + request.getSpecification()).build();
+            return Response.status(Status.BAD_REQUEST).entity(String.format(Messages.UNKNOWN_SPEC, request.getSpecification())).build();
         } catch (Exception e) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
@@ -114,11 +115,11 @@ public class TerrorResource {
             spec = set.get("specification", String.class);
 
             if (nbLast <= 0) {
-                throw new Exception("NbLast parameter must be > 0");
+                throw new Exception(Messages.POSITIVE_NB_LAST);
             }
 
             if (tsCollInfo == null) {
-                throw new Exception("Input Ts list can't be null");
+                throw new Exception(Messages.NO_SERIES);
             }
             InformationSet result = new InformationSet();
             
@@ -138,7 +139,7 @@ public class TerrorResource {
             xmlSet.copy(result);
             return Response.status(Status.OK).entity(xmlSet).build();
         } catch (IllegalArgumentException e) {
-            return Response.status(Status.BAD_REQUEST).entity("Could not find a default specification from : " + spec).build();
+            return Response.status(Status.BAD_REQUEST).entity(String.format(Messages.UNKNOWN_SPEC, spec)).build();
         } catch (Exception e) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }

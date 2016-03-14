@@ -9,10 +9,11 @@
     <artifactId>Terror</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <demetra.version>2.0.0</demetra.version>
+        <demetra.version>2.1.0</demetra.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
+        <swagger.version>1.5.6</swagger.version>
     </properties>
     
     <dependencies>
@@ -28,7 +29,7 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-jersey2-jaxrs</artifactId>
-            <version>1.5.3</version>
+            <version>${swagger.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

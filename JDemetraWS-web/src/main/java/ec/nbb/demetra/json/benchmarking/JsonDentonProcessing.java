@@ -16,19 +16,18 @@
  */
 package ec.nbb.demetra.json.benchmarking;
 
-import ec.nbb.demetra.json.JsonTsData;
+import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.TsAggregationType;
-import ec.tstoolkit.timeseries.simplets.TsFrequency;
 
 /**
  *
  * @author Mats Maggi
  */
 public class JsonDentonProcessing {
-    public JsonTsData x, y;
+    public XmlTsData x, y;
     public boolean mul = true;
     public boolean modified = true;
     public int differencing = 1;
     public TsAggregationType agg = TsAggregationType.Sum;
-    public TsFrequency defaultFrequency = TsFrequency.Undefined;
+    public int defaultFrequency = 0;
 }

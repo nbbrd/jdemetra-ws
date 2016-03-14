@@ -16,6 +16,7 @@
  */
 package ec.nbb.demetra.rest;
 
+import ec.nbb.demetra.Messages;
 import ec.nbb.demetra.filter.Compress;
 import ec.nbb.demetra.model.outlier.ShadowTs;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
@@ -97,7 +98,7 @@ public class SeasonalAdjustmentResource {
                 list.add("RSA5c");
                 break;
             default:
-                throw new IllegalArgumentException("Unrecognized algoritm (" + algorithm + ") !");
+                throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, algorithm));
         }
         return Response.ok().entity(list).build();
     }
@@ -134,11 +135,11 @@ public class SeasonalAdjustmentResource {
                 results = X13ProcessingFactory.process(RestUtils.createTsData(ts), sx);
                 break;
             default:
-                throw new IllegalArgumentException("Unrecognized algoritm (" + algorithm + ") !");
+                throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, algorithm));
         }
 
         if (results == null) {
-            throw new IllegalArgumentException("The processing returned no results !");
+            throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
         }
 
         List<ShadowTs> tsList = new ArrayList<>();
@@ -172,9 +173,13 @@ public class SeasonalAdjustmentResource {
         CompositeResults results = null;
         String specName;
         
+        if (ts == null) {
+            throw new IllegalArgumentException(Messages.TS_NULL);
+        }
+        
         TsInformation realTs = ts.create();
         if (!realTs.hasData()) {
-            throw new IllegalArgumentException("The given series is empty !");
+            throw new IllegalArgumentException(Messages.TS_EMPTY);
         }
 
         switch (algorithm.toLowerCase()) {
@@ -189,11 +194,11 @@ public class SeasonalAdjustmentResource {
                 results = X13ProcessingFactory.process(realTs.data, sx);
                 break;
             default:
-                throw new IllegalArgumentException("Unrecognized algoritm (" + algorithm + ") !");
+                throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, algorithm));
         }
 
         if (results == null) {
-            throw new IllegalArgumentException("The processing returned no results !");
+            throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
         }
 
         TsCollectionInformation tsList = new TsCollectionInformation(new TsMoniker(), TsInformationType.All);

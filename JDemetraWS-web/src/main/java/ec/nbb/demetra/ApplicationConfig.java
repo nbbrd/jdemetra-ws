@@ -16,6 +16,7 @@
  */
 package ec.nbb.demetra;
 
+import ec.nbb.demetra.json.JacksonJsonProvider;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -33,13 +34,14 @@ public class ApplicationConfig extends Application {
         // Swagger resources
         resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
         resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-        resources.add(io.swagger.jaxrs.json.JacksonJsonProvider.class);
+        resources.add(JacksonJsonProvider.class);
 
         // Application resources
         resources.add(ec.nbb.demetra.exception.DemetraExceptionMapper.class);
         resources.add(org.glassfish.jersey.jackson.JacksonFeature.class);
         resources.add(ec.nbb.demetra.filter.GZipWriterInterceptor.class);
         resources.add(ec.nbb.demetra.filter.GZipReaderInterceptor.class);
+        
         resources.add(ec.nbb.demetra.rest.TerrorResource.class);
         resources.add(ec.nbb.demetra.rest.HelloResource.class);
         resources.add(ec.nbb.demetra.rest.AnomalyDetectionResource.class);
@@ -53,6 +55,7 @@ public class ApplicationConfig extends Application {
         resources.add(ec.nbb.demetra.rest.X13Resource.class);
         resources.add(ec.nbb.demetra.rest.DummyResource.class);
         resources.add(ec.nbb.demetra.rest.HodrickPrescottResource.class);
+        resources.add(ec.nbb.demetra.rest.TsDataResource.class);
 
         return resources;
     }

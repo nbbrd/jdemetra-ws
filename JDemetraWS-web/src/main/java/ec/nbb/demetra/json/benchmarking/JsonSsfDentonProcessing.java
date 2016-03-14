@@ -16,7 +16,7 @@
  */
 package ec.nbb.demetra.json.benchmarking;
 
-import ec.nbb.demetra.json.JsonTsData;
+import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.TsAggregationType;
 
 /**
@@ -25,7 +25,7 @@ import ec.tstoolkit.timeseries.TsAggregationType;
  */
 public class JsonSsfDentonProcessing {
 
-    public JsonTsData x, y;
+    public XmlTsData x, y;
     public boolean mul = true;
     public TsAggregationType agg = TsAggregationType.Sum;
 }

@@ -10,6 +10,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <demetraws-version>0.0.1</demetraws-version>
+        <jersey.container.version>2.21</jersey.container.version>
+        <grizzly.version>2.3.22</grizzly.version>
     </properties>
     
     <dependencies>
@@ -23,13 +25,18 @@
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http</artifactId>
-            <version>2.3.22</version>
+            <version>${grizzly.version}</version>
         </dependency>
         
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-grizzly2-http</artifactId>
-            <version>2.21</version>
+            <version>${jersey.container.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <version>${jersey.container.version}</version>
         </dependency>
     </dependencies>
     <build>

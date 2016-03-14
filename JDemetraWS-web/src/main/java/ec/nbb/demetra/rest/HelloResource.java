@@ -38,6 +38,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.glassfish.jersey.server.ManagedAsync;
 
 /**
  * WebService providing machine name
@@ -74,6 +75,7 @@ public class HelloResource {
             }
 
             System.out.println("Hello from :\n" + name);
+
             return Response.status(Response.Status.OK).entity(name).build();
         } catch (UnknownHostException ex) {
             return Response.status(Response.Status.OK).entity("Hello World !").build();
@@ -82,6 +84,7 @@ public class HelloResource {
 
     @GET
     @Compress
+    @ManagedAsync
     @Path("/async")
     @Produces(MediaType.TEXT_PLAIN)
     @ApiOperation(value = "Says hello asynchronously", notes = "Says hello !", response = String.class)
@@ -102,23 +105,17 @@ public class HelloResource {
             }
         });
 
-        new Thread(new Runnable() {
+        String result = veryExpensiveOperation();
+        response.resume(result);
+    }
 
-            @Override
-            public void run() {
-                String result = veryExpensiveOperation();
-                response.resume(result);
-            }
-
-            private String veryExpensiveOperation() {
-                try {
-                    Thread.sleep(10000);
-                    return InetAddress.getLocalHost().getHostName();
-                } catch (InterruptedException | UnknownHostException ex) {
-                    Logger.getLogger(HelloResource.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return "Unknown host";
-            }
-        }).start();
+    private String veryExpensiveOperation() {
+        try {
+            Thread.sleep(10000);
+            return InetAddress.getLocalHost().getHostName();
+        } catch (InterruptedException | UnknownHostException ex) {
+            Logger.getLogger(HelloResource.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "Unknown host";
     }
 }

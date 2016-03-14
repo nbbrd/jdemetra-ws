@@ -17,6 +17,7 @@
 package ec.nbb.demetra.rest;
 
 import com.google.common.base.Strings;
+import ec.nbb.demetra.Messages;
 import ec.nbb.demetra.filter.Compress;
 import ec.satoolkit.algorithm.implementation.TramoSeatsProcessingFactory;
 import ec.satoolkit.tramoseats.TramoSeatsSpecification;
@@ -31,6 +32,7 @@ import io.swagger.annotations.ApiResponses;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -48,7 +50,7 @@ import javax.ws.rs.core.Response;
 @Produces({MediaType.APPLICATION_JSON})
 public class TramoSeatsResource {
 
-    private final String[] components = {"sa", "t", "s", "i"};
+    private final String[] components = {"sa", "t", "s", "i", "y_f"};
     
     @POST
     @Compress
@@ -63,7 +65,7 @@ public class TramoSeatsResource {
             }
     )
     public Response tramoSeats(@ApiParam(name = "tsData", required = true) XmlTsData tsData,
-            @ApiParam(name = "spec") @QueryParam(value = "spec") String spec) {
+            @ApiParam(name = "spec", defaultValue = "RSA4") @QueryParam(value = "spec") @DefaultValue("RSA4") String spec) {
         CompositeResults results = null;
         TramoSeatsSpecification specification;
         Map<String, XmlTsData> compMap = new HashMap<>();
@@ -75,14 +77,14 @@ public class TramoSeatsResource {
         }
 
         if (tsData == null) {
-            throw new IllegalArgumentException("The given ts is null !");
+            throw new IllegalArgumentException(Messages.TS_NULL);
         } else {
             TsData data = tsData.create();
             results = TramoSeatsProcessingFactory.process(data, specification);
         }
         
         if (results == null) {
-            throw new IllegalArgumentException("The processing returned no results !");
+            throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
         } else {
             for (String c : components) {
                 if (results.contains(c)) {

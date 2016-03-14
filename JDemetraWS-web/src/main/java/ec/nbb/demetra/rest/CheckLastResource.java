@@ -17,10 +17,11 @@
 package ec.nbb.demetra.rest;
 
 import com.google.common.base.Strings;
+import ec.nbb.demetra.Messages;
 import ec.nbb.demetra.filter.Compress;
 import ec.nbb.demetra.model.outlier.ShadowTs;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
-import ec.nbb.demetra.rest.model.TerrorResult;
+import ec.nbb.demetra.model.terror.TerrorResult;
 import ec.satoolkit.tramoseats.TramoSeatsSpecification;
 import ec.satoolkit.x13.X13Specification;
 import ec.tss.xml.XmlTsData;
@@ -37,6 +38,7 @@ import io.swagger.annotations.ApiResponses;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -68,18 +70,18 @@ public class CheckLastResource {
     )
     public Response checkLast(
             @ApiParam(name = "tsList", required = true) ShadowTs[] ts,
-            @ApiParam(name = "nbLast", required = true) @QueryParam("nbLast") int nbLast,
-            @ApiParam(name = "algorithm") @QueryParam("algorithm") String algorithm,
-            @ApiParam(name = "spec") @QueryParam("spec") String spec) {
+            @ApiParam(name = "nbLast", required = true) @QueryParam("nbLast") @DefaultValue("1") int nbLast,
+            @ApiParam(name = "algorithm") @QueryParam("algorithm") @DefaultValue("tramoseats") String algorithm,
+            @ApiParam(name = "spec") @QueryParam("spec") @DefaultValue("RSAfull") String spec) {
         IPreprocessor p = null;
         List<TerrorResult> results = new ArrayList<>();
 
         if (ts == null || ts.length == 0) {
-            throw new IllegalArgumentException("At least one time series must be provided !");
+            throw new IllegalArgumentException(Messages.NO_SERIES);
         }
 
         if (nbLast <= 0) {
-            throw new IllegalArgumentException("NbLast parameter must be > 0");
+            throw new IllegalArgumentException(Messages.POSITIVE_NB_LAST);
         }
 
         switch (algorithm.toLowerCase()) {
@@ -92,7 +94,7 @@ public class CheckLastResource {
                 p = x13Spec.buildPreprocessor();
                 break;
             default:
-                throw new IllegalArgumentException("Unrecognized algoritm (" + algorithm + ") !");
+                throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, algorithm));
         }
 
         CheckLast cl = new CheckLast(p);
@@ -108,7 +110,7 @@ public class CheckLastResource {
                     results.add(r);
                 }
             } catch (Exception ex) {
-                System.out.println("Unable to create Ts (" + t.getName() + ")");
+                System.out.println(String.format(Messages.TS_CREATION_ERROR, t.getName()));
                 System.out.println(ex);
             }
         }
@@ -131,14 +133,14 @@ public class CheckLastResource {
     )
     public Response checkLastNew(
             @ApiParam(name = "ts", required = true) XmlTsData ts,
-            @ApiParam(name = "nbLast", required = true) @QueryParam("nbLast") int nbLast,
-            @ApiParam(name = "spec", defaultValue = "TRfull") @QueryParam("spec") String spec) {
+            @ApiParam(name = "nbLast", required = true, defaultValue = "1") @QueryParam("nbLast") @DefaultValue("1") int nbLast,
+            @ApiParam(name = "spec", defaultValue = "TRfull") @QueryParam("spec") @DefaultValue("TRfull") String spec) {
         if (ts == null) {
-            throw new IllegalArgumentException("Given Ts is null !");
+            throw new IllegalArgumentException(Messages.TS_NULL);
         }
 
         if (nbLast <= 0) {
-            throw new IllegalArgumentException("NbLast parameter must be > 0");
+            throw new IllegalArgumentException(String.format(Messages.POSITIVE_NB_LAST, nbLast));
         }
 
         if (Strings.isNullOrEmpty(spec)) {
@@ -146,6 +148,10 @@ public class CheckLastResource {
         }
 
         TsData input = ts.create();
+        if (input.isEmpty()) {
+            throw new IllegalArgumentException(Messages.TS_EMPTY);
+        }
+        
         IPreprocessor p = TramoSpecification.defaultPreprocessor(
                 TramoSpecification.Default.valueOf(spec));
         CheckLast cl = new CheckLast(p);
@@ -155,7 +161,7 @@ public class CheckLastResource {
                     cl.getForecastsValues(), cl.getScores());
             return Response.ok().entity(result).build();
         } else {
-            return Response.serverError().entity("Unable to process the Check Last !").build();
+            return Response.serverError().entity(Messages.CHECKLAST_ERROR).build();
         }
     }
 }

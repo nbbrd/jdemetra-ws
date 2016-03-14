@@ -16,14 +16,13 @@
  */
 package ec.nbb.demetra.rest.test;
 
+import ec.nbb.demetra.json.JsonTsCollection;
 import ec.tss.TsCollectionInformation;
 import ec.tss.TsInformation;
 import ec.tss.TsInformationType;
 import ec.tss.TsMoniker;
-import ec.tss.xml.IXmlConverter;
 import ec.tss.xml.XmlPeriodSelection;
 import ec.tss.xml.XmlTs;
-import ec.tss.xml.XmlTsCollection;
 import ec.tss.xml.XmlTsData;
 import ec.tss.xml.XmlTsMoniker;
 import ec.tss.xml.XmlTsPeriod;
@@ -50,7 +49,7 @@ import org.junit.Test;
  */
 public class XmlTest {
     
-    private final String mediaType = MediaType.APPLICATION_XML;
+    private final String mediaType = MediaType.APPLICATION_JSON;
 
     // <editor-fold desc="XmlTs">
     @Test
@@ -102,14 +101,14 @@ public class XmlTest {
             info.data = d;
             collection.items.add(info);
         }
-        XmlTsCollection xmlTsCollection = new XmlTsCollection();
-        xmlTsCollection.copy(collection);
+        JsonTsCollection xmlTsCollection = new JsonTsCollection();
+        xmlTsCollection.from(collection);
 
         Response resp = callWS(xmlTsCollection, "tscollection", mediaType);
         Assert.assertEquals(200, resp.getStatus());
-        XmlTsCollection responseXml = resp.readEntity(XmlTsCollection.class);
+        JsonTsCollection responseXml = resp.readEntity(JsonTsCollection.class);
         Assert.assertNotNull(responseXml);
-        Assert.assertEquals(responseXml.tslist.length, xmlTsCollection.tslist.length);
+        Assert.assertEquals(responseXml.ts.size(), xmlTsCollection.ts.size());
     }
     // </editor-fold>
     
@@ -163,7 +162,7 @@ public class XmlTest {
     }
     // </editor-fold>
 
-    private Response callWS(IXmlConverter entity, String path, String type) {
+    private Response callWS(Object entity, String path, String type) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();

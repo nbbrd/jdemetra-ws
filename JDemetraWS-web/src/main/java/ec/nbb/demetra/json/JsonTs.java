@@ -38,23 +38,26 @@ public class JsonTs implements IJsonConverter<TsInformation> {
 
     @XmlElement
     public Integer freq;
-    
+
     @XmlElement
     public Integer firstYear;
-    
+
     @XmlElement
     public Integer firstPeriod;
-    
+
     @XmlElement(name = "data")
     @XmlList
     public double[] data;
-    
+
+    @XmlElement
+    public JsonMetaData metaData;
+
     @XmlAttribute
     public String name;
-    
+
     @XmlAttribute
     public String source;
-    
+
     @XmlAttribute
     public String identifier;
 
@@ -71,6 +74,10 @@ public class JsonTs implements IJsonConverter<TsInformation> {
         source = t.moniker.getSource();
         identifier = t.moniker.getId();
         name = t.name;
+        if (t.metaData != null && !t.metaData.isEmpty()) {
+            metaData = new JsonMetaData();
+            metaData.from(t.metaData);
+        }
     }
 
     public TsInformation to() {
@@ -80,6 +87,10 @@ public class JsonTs implements IJsonConverter<TsInformation> {
         if (data != null) {
             info.data = new TsData(TsFrequency.valueOf(freq), firstYear,
                     firstPeriod - 1, data, false);
+        }
+
+        if (metaData != null) {
+            info.metaData = metaData.create();
         }
         return info;
     }

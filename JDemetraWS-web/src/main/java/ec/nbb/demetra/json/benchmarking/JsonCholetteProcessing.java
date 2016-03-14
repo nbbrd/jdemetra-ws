@@ -17,7 +17,7 @@
 package ec.nbb.demetra.json.benchmarking;
 
 import ec.benchmarking.simplets.TsCholette;
-import ec.nbb.demetra.json.JsonTsData;
+import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.TsAggregationType;
 
 /**
@@ -26,8 +26,8 @@ import ec.tstoolkit.timeseries.TsAggregationType;
  */
 public class JsonCholetteProcessing {
 
-    public JsonTsData x, y;
+    public XmlTsData x, y;
     public double rho = 1, lambda = 1;
-    public TsCholette.BiasCorrection bias = TsCholette.BiasCorrection.None;
+    public String bias = TsCholette.BiasCorrection.None.toString();
     public TsAggregationType agg = TsAggregationType.Sum;
 }

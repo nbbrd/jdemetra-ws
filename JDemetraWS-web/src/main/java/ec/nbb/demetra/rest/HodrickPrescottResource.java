@@ -17,6 +17,7 @@
 package ec.nbb.demetra.rest;
 
 import ec.businesscycle.impl.HodrickPrescott;
+import ec.nbb.demetra.Messages;
 import ec.nbb.demetra.filter.Compress;
 import ec.satoolkit.algorithm.implementation.TramoSeatsProcessingFactory;
 import ec.satoolkit.algorithm.implementation.X13ProcessingFactory;
@@ -46,8 +47,8 @@ import javax.ws.rs.core.Response;
  *
  * @author Mats Maggi
  */
-@Path("/hendrickprescott")
-@Api(value = "/hendrickprescott")
+@Path("/hodrickprescott")
+@Api(value = "/hodrickprescott")
 @Consumes({MediaType.APPLICATION_JSON})
 @Produces({MediaType.APPLICATION_JSON})
 public class HodrickPrescottResource {
@@ -65,21 +66,24 @@ public class HodrickPrescottResource {
             }
     )
     public Response hodrickPrescott(@ApiParam(name = "tsData", required = true) XmlTsData tsData,
-            @ApiParam(name = "method") @QueryParam(value = "method") @DefaultValue("TramoSeats") String method,
-            @ApiParam(name = "spec") @QueryParam(value = "spec") @DefaultValue("RSA4") String spec,
-            @ApiParam(name = "target") @QueryParam(value = "target") @DefaultValue("Sa") String target,
-            @ApiParam(name = "deflambda") @QueryParam(value = "deflambda") @DefaultValue("true") boolean deflambda,
-            @ApiParam(name = "lambda") @QueryParam(value = "lambda") @DefaultValue("1600") Double lambda,
-            @ApiParam(name = "mul") @QueryParam(value = "mul") @DefaultValue("false") boolean mul,
-            @ApiParam(name = "lcycle") @QueryParam(value = "lcycle") @DefaultValue("0") Double lcycle) {
+            @ApiParam(name = "method", defaultValue = "TramoSeats") @QueryParam(value = "method") @DefaultValue("TramoSeats") String method,
+            @ApiParam(name = "spec", defaultValue = "RSA4") @QueryParam(value = "spec") @DefaultValue("RSA4") String spec,
+            @ApiParam(name = "target", defaultValue = "Sa") @QueryParam(value = "target") @DefaultValue("Sa") String target,
+            @ApiParam(name = "deflambda", defaultValue = "true") @QueryParam(value = "deflambda") @DefaultValue("true") boolean deflambda,
+            @ApiParam(name = "lambda", defaultValue = "1600") @QueryParam(value = "lambda") @DefaultValue("1600") Double lambda,
+            @ApiParam(name = "mul", defaultValue = "false") @QueryParam(value = "mul") @DefaultValue("false") boolean mul,
+            @ApiParam(name = "lcycle", defaultValue = "0") @QueryParam(value = "lcycle") @DefaultValue("0") Double lcycle) {
 
         Map<String, XmlTsData> results = new HashMap<>();
 
         if (tsData == null || tsData.create() == null) {
-            throw new IllegalArgumentException("The given ts is null !");
+            throw new IllegalArgumentException(Messages.TS_NULL);
         }
 
         TsData data = tsData.create();
+        if (data.isEmpty()) {
+            throw new IllegalArgumentException(Messages.TS_EMPTY);
+        }
 
         // Seasonal Adjustment step
         CompositeResults saResults = new CompositeResults();
@@ -93,11 +97,11 @@ public class HodrickPrescottResource {
                 saResults = X13ProcessingFactory.process(data, sx);
                 break;
             default:
-                throw new IllegalArgumentException("Unrecognized method (" + method + ") !");
+                throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, method.toLowerCase()));
         }
 
         if (saResults == null) {
-            throw new IllegalArgumentException("The SA processing returned no results !");
+            throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
         }
 
         TsData targetData = null;
@@ -114,7 +118,7 @@ public class HodrickPrescottResource {
         }
 
         if (targetData == null) {
-            throw new IllegalArgumentException("Unable to get the targetted Sa series for target : " + target + " !");
+            throw new IllegalArgumentException(String.format(Messages.UNKNOWN_TARGET, target));
         }
         
         // Hendrick Prescott step
@@ -129,7 +133,7 @@ public class HodrickPrescottResource {
         hp.setLambda(lambda);
 
         if (!hp.process(input.getValues().internalStorage())) {
-            throw new IllegalArgumentException("Hodrick Prescott processed unsuccesfully !");
+            throw new IllegalArgumentException(Messages.CHECKLAST_ERROR);
         } else {
             TsData t = new TsData(targetData.getStart(), hp.getSignal(), false);
             if (mul) {

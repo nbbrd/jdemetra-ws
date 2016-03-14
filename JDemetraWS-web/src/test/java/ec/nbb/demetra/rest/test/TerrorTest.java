@@ -17,8 +17,8 @@
 package ec.nbb.demetra.rest.test;
 
 import com.google.common.base.Stopwatch;
-import ec.nbb.demetra.rest.model.TerrorRequest;
-import ec.nbb.demetra.rest.model.TerrorResults;
+import ec.nbb.demetra.model.terror.TerrorRequest;
+import ec.nbb.demetra.model.terror.TerrorResults;
 import ec.tss.TsCollection;
 import ec.tss.TsCollectionInformation;
 import ec.tss.TsFactory;
