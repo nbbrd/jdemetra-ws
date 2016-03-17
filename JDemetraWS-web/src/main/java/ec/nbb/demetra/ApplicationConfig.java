@@ -22,6 +22,8 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 /**
+ * Application configuration. Registers swagger api resources, serializers,
+ * filters, providers and REST resources.
  *
  * @author Mats Maggi
  */
@@ -41,19 +43,17 @@ public class ApplicationConfig extends Application {
         resources.add(org.glassfish.jersey.jackson.JacksonFeature.class);
         resources.add(ec.nbb.demetra.filter.GZipWriterInterceptor.class);
         resources.add(ec.nbb.demetra.filter.GZipReaderInterceptor.class);
-        
+
         resources.add(ec.nbb.demetra.rest.TerrorResource.class);
-        resources.add(ec.nbb.demetra.rest.HelloResource.class);
         resources.add(ec.nbb.demetra.rest.AnomalyDetectionResource.class);
         resources.add(ec.nbb.demetra.rest.BalancingResource.class);
         resources.add(ec.nbb.demetra.rest.SeasonalAdjustmentResource.class);
         resources.add(ec.nbb.demetra.rest.ForecastingResource.class);
         resources.add(ec.nbb.demetra.rest.CheckLastResource.class);
-        resources.add(ec.nbb.demetra.rest.TestXmlResource.class);        
+        resources.add(ec.nbb.demetra.rest.TestXmlResource.class);
         resources.add(ec.nbb.demetra.rest.BenchmarkingResource.class);
         resources.add(ec.nbb.demetra.rest.TramoSeatsResource.class);
         resources.add(ec.nbb.demetra.rest.X13Resource.class);
-        resources.add(ec.nbb.demetra.rest.DummyResource.class);
         resources.add(ec.nbb.demetra.rest.HodrickPrescottResource.class);
         resources.add(ec.nbb.demetra.rest.TsDataResource.class);
 

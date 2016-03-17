@@ -26,7 +26,7 @@ public class DimensionSummary {
 
     @JsonProperty(value = "Name")
     private String name;
-    
+
     @JsonProperty(value = "Count")
     private int count;
 

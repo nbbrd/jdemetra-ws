@@ -26,7 +26,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- *
+ * Cross-Origin Resource Filter.
  * @author Mats Maggi
  */
 @WebFilter(filterName = "HTML5CorsFilter", urlPatterns = {"/api/*"}, asyncSupported = true)

@@ -26,6 +26,9 @@ import javax.ws.rs.ext.ReaderInterceptor;
 import javax.ws.rs.ext.ReaderInterceptorContext;
 
 /**
+ * GZIP Interceptor that reads all requests and look for a gzip header. If the
+ * header exists, the response input stream in converted to a gzip stream to
+ * allow the decompression
  *
  * @author Mats Maggi
  */
@@ -33,7 +36,7 @@ import javax.ws.rs.ext.ReaderInterceptorContext;
 public class GZipReaderInterceptor implements ReaderInterceptor {
 
     @Override
-    public Object aroundReadFrom(ReaderInterceptorContext context)  throws IOException, WebApplicationException {
+    public Object aroundReadFrom(ReaderInterceptorContext context) throws IOException, WebApplicationException {
         String header = context.getHeaders().getFirst(HttpHeaders.CONTENT_ENCODING);
         if (header != null && header.contains("gzip")) {
             InputStream originalInputStream = context.getInputStream();

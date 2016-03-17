@@ -26,21 +26,23 @@ import javax.ws.rs.ext.WriterInterceptor;
 import javax.ws.rs.ext.WriterInterceptorContext;
 
 /**
+ * GZIP Interceptor that wraps the response in a gzip output stream. The
+ * responses of methods that are annotated with <code>@Compress</code> are
+ * automatically gzipped by this interceptor
  *
  * @author Mats Maggi
  */
 @Provider
 @Compress
 public class GZipWriterInterceptor implements WriterInterceptor {
-	 
+
     @Override
     public void aroundWriteTo(WriterInterceptorContext context)
-                    throws IOException, WebApplicationException {
+            throws IOException, WebApplicationException {
         context.getHeaders().putSingle(HttpHeaders.CONTENT_ENCODING, "gzip");
-        
+
         final OutputStream outputStream = context.getOutputStream();
         context.setOutputStream(new GZIPOutputStream(outputStream));
         context.proceed();
     }
 }
-

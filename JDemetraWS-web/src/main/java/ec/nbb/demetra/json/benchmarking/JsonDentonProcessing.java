@@ -18,16 +18,35 @@ package ec.nbb.demetra.json.benchmarking;
 
 import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.TsAggregationType;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
+ * POJO use for the Denton Processing request
  *
  * @author Mats Maggi
  */
+@ApiModel
 public class JsonDentonProcessing {
-    public XmlTsData x, y;
+
+    @ApiModelProperty
+    public XmlTsData x;
+
+    @ApiModelProperty
+    public XmlTsData y;
+
+    @ApiModelProperty
     public boolean mul = true;
+
+    @ApiModelProperty
     public boolean modified = true;
+
+    @ApiModelProperty
     public int differencing = 1;
+
+    @ApiModelProperty
     public TsAggregationType agg = TsAggregationType.Sum;
+
+    @ApiModelProperty
     public int defaultFrequency = 0;
 }

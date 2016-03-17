@@ -18,26 +18,29 @@ package ec.nbb.demetra;
 
 /**
  * Error messages used by the web services
+ *
  * @author Mats Maggi
  */
 public class Messages {
+
     // GENERAL
     public static final String TS_NULL = "The given ts is null !";
+    public static final String TSCOLLECTION_NULL = "The given collection of ts is null or empty !";
     public static final String TS_EMPTY = "The given ts doesn't contain any observation !";
     public static final String UNKNOWN_METHOD = "Unable to recognize the provided method : %s !";
     public static final String UNKNOWN_SPEC = "Could not find a default specification from : %s !";
     public static final String PROCESSING_ERROR = "The processing has returned no results !";
     public static final String NO_SERIES = "At least one time series must be provided !";
     public static final String TS_CREATION_ERROR = "Unable to create the Ts (Name : %s) !";
-    
+
     // CHECK LAST
     public static final String POSITIVE_NB_LAST = "NbLast parameter must be greater than 0 (provided : %d) !";
     public static final String CHECKLAST_ERROR = "The Check Last processing has failed !";
-    
+
     // HODRICK PRESCOTT
     public static final String HP_ERROR = "Hodrick Prescott processing has returned an error !";
     public static final String UNKNOWN_TARGET = "Unable to get the targetted Sa series for target : %s !";
-    
+
     // OUTLIERS DETECTION
     public static final String NO_OUTLIERS_TYPE = "At least one outlier type must be specified !";
 }

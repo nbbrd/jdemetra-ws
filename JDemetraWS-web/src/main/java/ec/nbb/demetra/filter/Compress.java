@@ -21,6 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 import javax.ws.rs.NameBinding;
 
 /**
+ * Annotation to use on methods to automatically gzip compress the response.
  *
  * @author Mats Maggi
  */

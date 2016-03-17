@@ -23,12 +23,13 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 /**
+ * Mapper that catches all exceptions coming from the resources.
  *
  * @author Mats Maggi
  */
 @Provider
 public class DemetraExceptionMapper implements ExceptionMapper<Throwable> {
-    
+
     @Override
     public Response toResponse(Throwable exception) {
         exception.printStackTrace();

@@ -19,15 +19,32 @@ package ec.nbb.demetra.json.benchmarking;
 import ec.benchmarking.simplets.TsCholette;
 import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.TsAggregationType;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
+ * POJO use for the Cholette Processing request
  *
  * @author Mats Maggi
  */
+@ApiModel
 public class JsonCholetteProcessing {
 
-    public XmlTsData x, y;
-    public double rho = 1, lambda = 1;
+    @ApiModelProperty
+    public XmlTsData x;
+
+    @ApiModelProperty
+    public XmlTsData y;
+
+    @ApiModelProperty
+    public double rho = 1;
+
+    @ApiModelProperty
+    public double lambda = 1;
+
+    @ApiModelProperty
     public String bias = TsCholette.BiasCorrection.None.toString();
+
+    @ApiModelProperty
     public TsAggregationType agg = TsAggregationType.Sum;
 }

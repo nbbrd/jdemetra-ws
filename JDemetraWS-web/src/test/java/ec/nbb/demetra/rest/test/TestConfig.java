@@ -24,9 +24,8 @@ public class TestConfig {
     private static final boolean isLocal = true;
     
     public static final String LOCAL_URL = "http://localhost:9998/demetra/api";
-    public static final String REMOTE_URL = "http://srvdqrdd2.nbb.local:9998/demetra/api";
     
     public static String getUrl() {
-        return isLocal ? LOCAL_URL : REMOTE_URL;
+        return LOCAL_URL;
     }
 }

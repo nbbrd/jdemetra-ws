@@ -96,5 +96,5 @@ public class BalanceLinearConstraint {
     public void setWeigth(double weigth) {
         this.weigth = weigth;
     }
- 
+
 }
