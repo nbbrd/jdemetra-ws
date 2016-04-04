@@ -20,7 +20,7 @@
         <version.javax-servlet>3.1.0</version.javax-servlet>
         <version.jetty>9.2.7.v20150116</version.jetty>        
         <version.jersey>2.21</version.jersey>
-        <demetra.version>2.1.0-rc3</demetra.version>
+        <demetra.version>2.1.0-rc4</demetra.version>
         <swagger.version>1.5.8</swagger.version>
     </properties>
     
