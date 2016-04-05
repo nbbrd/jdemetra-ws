@@ -1,13 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>ec.nbb.demetra</groupId>
-  <artifactId>JDemetraWS</artifactId>
-  <version>0.0.1</version>
-  <packaging>pom</packaging>
-  <name>JDemetraWS</name>
-  <modules>
-    <module>JDemetraWS-web</module>
-    <module>JDemetraWS-standalone</module>
-  </modules>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>ec.nbb.demetra</groupId>
+    <artifactId>webservice-parent</artifactId>
+    <version>0.0.1</version>
+    <packaging>pom</packaging>
+    <name>JDemetra+ Web Service</name>
+    <modules>
+        <module>ws-commons</module>
+        <module>demetra-webapp</module>
+        <module>demetra-webapp-standalone</module>
+    </modules>
+  
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <ws-version>0.0.1</ws-version>
+        <junit-version>4.12</junit-version>
+        <version.jersey>2.21</version.jersey>
+        <swagger.version>1.5.8</swagger.version>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
+  
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit-version}</version>
+                <scope>test</scope>
+            </dependency>
+        
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-json-jackson</artifactId>
+                <version>${version.jersey}</version>
+            </dependency>
+        
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-jaxb</artifactId>
+                <version>${version.jersey}</version>
+            </dependency>
+            
+            <!-- Swagger -->
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-jersey2-jaxrs</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
