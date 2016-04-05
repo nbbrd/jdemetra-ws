@@ -18,6 +18,7 @@ quest (otherwise the call overrides the explicit given header)
 	    .post(Entity.entity(ts, MediaType.APPLICATION_JSON));
 
 ##Server-side
+_NB : The standalone project can be built to produce a jar that starts the server (so, an application server like Glassfish is not needed but the swagger documentation can't be accessed at the moment)_
 
 ###Exception Mapper
 
@@ -206,38 +207,4 @@ _NB : The setResourcePackage(String package) allows defining the package locatio
             }
         }
     }
-
-##Appendix
-
-###Maven dependencies
-
-####Test client
-
-	<dependency>
-		<groupId>com.sun.jersey</groupId>
-		<artifactId>jersey-grizzly2</artifactId>
-		<version>1.19</version>
-		<scope>test</scope>
-	</dependency>
-	<dependency>
-		<groupId>junit</groupId>
-		<artifactId>junit</artifactId>
-		<version>4.12</version>
-		<scope>test</scope>
-	</dependency>
-
-####Server
-
-	<dependency>
-		<groupId>javax</groupId>
-		<artifactId>javaee-web-api</artifactId>
-		<version>7.0</version>
-		<scope>provided</scope>
-	</dependency>
-	
-	<dependency>
-		<groupId>org.glassfish.jersey.core</groupId>
-		<artifactId>jersey-client</artifactId>
-		<version>2.21</version>
-	</dependency>
 
