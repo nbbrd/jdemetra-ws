@@ -43,6 +43,11 @@
             <groupId>eu.europa.ec.joinup.sat</groupId>
             <artifactId>demetra-tss</artifactId>
         </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sat</groupId>
+            <artifactId>nbdemetra-ui</artifactId>
+            <version>${demetra.version}</version>
+        </dependency>
         
         <dependency>
             <groupId>io.swagger</groupId>

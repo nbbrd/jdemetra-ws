@@ -17,6 +17,7 @@
 package ec.nbb.demetra.model.outlier;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import ec.tss.xml.XmlTsPeriod;
 import ec.tstoolkit.timeseries.regression.OutlierType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -32,7 +33,7 @@ public class ShadowOutlier {
     @JsonProperty(value = "OutlierType")
     private OutlierType outlierType;
     @JsonProperty(value = "Period")
-    private int period;
+    private XmlTsPeriod period;
     @JsonProperty(value = "Value")
     public double value;
     @JsonProperty(value = "StDev")
@@ -49,12 +50,12 @@ public class ShadowOutlier {
     }
 
     @JsonProperty(value = "Period")
-    public int getPeriod() {
+    public XmlTsPeriod getPeriod() {
         return period;
     }
 
     @JsonProperty(value = "Period")
-    public void setPeriod(int period) {
+    public void setPeriod(XmlTsPeriod period) {
         this.period = period;
     }
 

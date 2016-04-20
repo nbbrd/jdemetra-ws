@@ -18,10 +18,8 @@ package ec.nbb.demetra.rest;
 
 import com.google.common.base.Strings;
 import ec.nbb.demetra.Messages;
-import ec.nbb.ws.annotations.Compress;
-import ec.nbb.demetra.model.outlier.ShadowTs;
-import ec.nbb.demetra.model.rest.utils.RestUtils;
 import ec.nbb.demetra.model.terror.TerrorResult;
+import ec.nbb.ws.annotations.Compress;
 import ec.satoolkit.tramoseats.TramoSeatsSpecification;
 import ec.satoolkit.x13.X13Specification;
 import ec.tss.xml.XmlTsData;
@@ -47,6 +45,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
+ * Resource that executes the Check Last algorithm for given time series.
  *
  * @author Mats Maggi
  */
@@ -60,6 +59,63 @@ public class CheckLastResource {
     @Compress
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Process a check last on a given Ts", notes = "Creates a check last processing.", response = TerrorResult.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "Successful processing of check last", response = TerrorResult.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response checkLast(
+            @ApiParam(name = "ts", required = true) XmlTsData ts,
+            @ApiParam(name = "nbLast", required = true, defaultValue = "1") @QueryParam("nbLast") @DefaultValue("1") int nbLast,
+            @ApiParam(name = "algorithm", defaultValue = "tramoseats") @QueryParam("algorithm") @DefaultValue("tramoseats") String algorithm,
+            @ApiParam(name = "spec", defaultValue = "RSAfull") @QueryParam("spec") @DefaultValue("RSAfull") String spec) {
+        IPreprocessor p;
+
+        if (ts == null) {
+            throw new IllegalArgumentException(Messages.TS_NULL);
+        }
+
+        TsData input = ts.create();
+        if (input.isEmpty()) {
+            throw new IllegalArgumentException(Messages.TS_EMPTY);
+        }
+
+        if (nbLast <= 0) {
+            throw new IllegalArgumentException(String.format(Messages.POSITIVE_NB_LAST, nbLast));
+        }
+
+        switch (algorithm.toLowerCase()) {
+            case "tramoseats":
+                TramoSeatsSpecification tsSpec = TramoSeatsSpecification.fromString(spec == null ? "" : spec);
+                p = tsSpec.buildPreprocessor(new ProcessingContext());
+                break;
+            case "x13":
+                X13Specification x13Spec = X13Specification.fromString(spec == null ? "" : spec);
+                p = x13Spec.buildPreprocessor();
+                break;
+            default:
+                throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, algorithm));
+        }
+
+        CheckLast cl = new CheckLast(p);
+        cl.setBackCount(nbLast);
+        if (cl.check(input)) {
+            TerrorResult result = new TerrorResult(ts.name == null ? "CheckLast" : ts.name, cl.getValues(),
+                    cl.getForecastsValues(), cl.getScores());
+            return Response.ok().entity(result).build();
+        } else {
+            return Response.serverError().entity(Messages.CHECKLAST_ERROR).build();
+        }
+    }
+
+    @POST
+    @Path("/collection")
+    @Compress
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Process a check last on a given list of Ts", notes = "Creates a check last processing.", response = TerrorResult.class, responseContainer = "List")
     @ApiResponses(
             value = {
@@ -69,14 +125,14 @@ public class CheckLastResource {
             }
     )
     public Response checkLast(
-            @ApiParam(name = "tsList", required = true) ShadowTs[] ts,
+            @ApiParam(name = "tsCollection", required = true) XmlTsData[] tsCollection,
             @ApiParam(name = "nbLast", required = true) @QueryParam("nbLast") @DefaultValue("1") int nbLast,
             @ApiParam(name = "algorithm") @QueryParam("algorithm") @DefaultValue("tramoseats") String algorithm,
             @ApiParam(name = "spec") @QueryParam("spec") @DefaultValue("RSAfull") String spec) {
         IPreprocessor p = null;
         List<TerrorResult> results = new ArrayList<>();
 
-        if (ts == null || ts.length == 0) {
+        if (tsCollection == null || tsCollection.length == 0) {
             throw new IllegalArgumentException(Messages.NO_SERIES);
         }
 
@@ -100,21 +156,23 @@ public class CheckLastResource {
         CheckLast cl = new CheckLast(p);
         cl.setBackCount(nbLast);
 
-        for (ShadowTs t : ts) {
-            try {
-                if (cl.check(RestUtils.createTsData(t))) {
-                    TerrorResult r = new TerrorResult(t.getName());
-                    r.setValue(cl.getValues());
-                    r.setForecast(cl.getForecastsValues());
-                    r.setScore(cl.getScores());
-                    results.add(r);
+        for (XmlTsData t : tsCollection) {
+            if (t != null) {
+                TsData data = t.create();
+                try {
+                    if (cl.check(data)) {
+                        TerrorResult r = new TerrorResult(t.name);
+                        r.setValue(cl.getValues());
+                        r.setForecast(cl.getForecastsValues());
+                        r.setScore(cl.getScores());
+                        results.add(r);
+                    }
+                } catch (Exception ex) {
+                    System.out.println(String.format(Messages.TS_CREATION_ERROR, t.name));
+                    System.out.println(ex);
                 }
-            } catch (Exception ex) {
-                System.out.println(String.format(Messages.TS_CREATION_ERROR, t.getName()));
-                System.out.println(ex);
             }
         }
-
         return Response.ok().entity(results).build();
     }
 
@@ -151,13 +209,13 @@ public class CheckLastResource {
         if (input.isEmpty()) {
             throw new IllegalArgumentException(Messages.TS_EMPTY);
         }
-        
+
         IPreprocessor p = TramoSpecification.defaultPreprocessor(
                 TramoSpecification.Default.valueOf(spec));
         CheckLast cl = new CheckLast(p);
         cl.setBackCount(nbLast);
         if (cl.check(input)) {
-            TerrorResult result = new TerrorResult("CheckLast", cl.getValues(), 
+            TerrorResult result = new TerrorResult("CheckLast", cl.getValues(),
                     cl.getForecastsValues(), cl.getScores());
             return Response.ok().entity(result).build();
         } else {

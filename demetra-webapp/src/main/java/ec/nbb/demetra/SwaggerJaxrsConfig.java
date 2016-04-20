@@ -43,7 +43,7 @@ public class SwaggerJaxrsConfig extends HttpServlet {
             beanConfig.setTitle("JDemetra+ Web Service");
             Info info = new Info();
             info.setTitle("JDemetra+ Web Service");
-            info.setDescription("Web service providing access to JDemetra+ algorithms");
+            info.setDescription("Web service providing access to JDemetra+ algorithms and utilities");
             info.setVersion("1.0.0");
             beanConfig.setInfo(info);
 

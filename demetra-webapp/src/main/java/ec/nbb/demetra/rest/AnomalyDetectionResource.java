@@ -17,16 +17,10 @@
 package ec.nbb.demetra.rest;
 
 import ec.nbb.demetra.Messages;
-import ec.nbb.ws.annotations.Compress;
-import ec.nbb.demetra.json.JsonTsPeriod;
-import ec.nbb.demetra.model.outlier.Outlier;
-import ec.nbb.demetra.model.outlier.OutlierRequest;
-import ec.nbb.demetra.model.outlier.OutlierResult;
-import ec.nbb.demetra.model.outlier.OutlierResults;
 import ec.nbb.demetra.model.outlier.ShadowOutlier;
-import ec.nbb.demetra.model.outlier.ShadowTs;
-import ec.nbb.demetra.model.rest.utils.RestUtils;
-import ec.tss.TsCollection;
+import ec.nbb.ws.annotations.Compress;
+import ec.tss.xml.XmlTsData;
+import ec.tss.xml.XmlTsPeriod;
 import ec.tstoolkit.modelling.DefaultTransformationType;
 import ec.tstoolkit.modelling.arima.IPreprocessor;
 import ec.tstoolkit.modelling.arima.PreprocessingModel;
@@ -42,9 +36,11 @@ import io.swagger.annotations.ApiResponses;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -60,76 +56,56 @@ import javax.ws.rs.core.Response.Status;
 public class AnomalyDetectionResource {
 
     @POST
-    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Process an outlier detection on given Ts", notes = "Creates an outlier detection", response = OutlierResults.class)
+    @Compress
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Process an outlier detection on a given Ts", notes = "Creates an outlier detection", response = ShadowOutlier.class, responseContainer = "List")
     @ApiResponses(
             value = {
-                @ApiResponse(code = 200, message = "Successful processing of outlier detection", response = OutlierResults.class),
+                @ApiResponse(code = 200, message = "Successful processing of outlier detection", response = ShadowOutlier.class, responseContainer = "List"),
                 @ApiResponse(code = 400, message = "Bad request", response = String.class),
                 @ApiResponse(code = 500, message = "Invalid request", response = String.class)
             }
     )
-    public Response outlierDetection(@ApiParam(name = "OutlierRequest", required = true) OutlierRequest request) {
-        try {
-            TsCollection tsCollection = request.getSeries().createTSCollection();
-            double critical = request.getCriticalValue();
-            String transformation = request.getTransformation();
-            TramoSpecification spec = getSpecification(request.getSpecification());
-            setShownOutliers(spec, request.isShowAO(), request.isShowLS(), request.isShowTC(), request.isShowSO());
-            setTransformation(spec, transformation);
-            spec.getOutliers().setCriticalValue(critical);
+    public Response outlierDetectionShadow(@ApiParam(name = "ts", required = true) XmlTsData ts,
+            @ApiParam(name = "transformation", defaultValue = "None", allowableValues = "None,Auto,Log") @QueryParam(value = "transformation") @DefaultValue("None") String transformation,
+            @ApiParam(name = "critical", defaultValue = "2.5") @QueryParam(value = "critical") @DefaultValue("2.5") double cv,
+            @ApiParam(name = "spec", defaultValue = "TRfull") @QueryParam(value = "spec") @DefaultValue("TRfull") String spec) {
+        
+        TramoSpecification tramoSpec = getSpecification(spec);
+        setShownOutliers(tramoSpec, true, true, true, true);
+        setTransformation(tramoSpec, transformation);
+        tramoSpec.getOutliers().setCriticalValue(cv);
 
-            OutlierResults results = new OutlierResults();
+        List<ShadowOutlier> outliers = new ArrayList<>();
 
-            IPreprocessor processor = spec.build();
+        IPreprocessor processor = tramoSpec.build();
 
-            for (int i = 0; i < tsCollection.getCount(); i++) {
-                TsData tsData = tsCollection.get(i).getTsData();
-                String name = tsCollection.get(i).getName();
-                OutlierResult r = new OutlierResult();
-                r.setName(name);
+        TsData tsData = ts.create();
 
-                if (tsData == null || tsData.getLength() == 0) {
-                    r.setStatus(Messages.TS_EMPTY);
-                } else {
-                    OutlierEstimation[] oe;
-                    PreprocessingModel model = processor.process(tsData, null);
-                    if (model != null) {
-                        oe = model.outliersEstimation(true, false);
+        OutlierEstimation[] oe;
+        PreprocessingModel model = processor.process(tsData, null);
+        if (model != null) {
+            oe = model.outliersEstimation(true, false);
 
-                        if (oe != null && oe.length > 0) {
-                            r.setStatus("Success");
-                            for (OutlierEstimation out : oe) {
-                                Outlier o = new Outlier();
-                                JsonTsPeriod p = new JsonTsPeriod();
-                                p.from(out.getPosition());
-                                o.setPosition(p);
-                                o.setType(out.getCode().toString());
-                                o.setStdev(out.getStdev());
-                                o.setValue(out.getValue());
-                                o.setTStat(out.getTStat());
+            if (oe != null && oe.length > 0) {
+                for (OutlierEstimation out : oe) {
+                    ShadowOutlier o = new ShadowOutlier();
+                    XmlTsPeriod period = new XmlTsPeriod();
+                    period.copy(out.getPosition());
+                    o.setPeriod(period);
+                    o.setOutlierType(out.getCode());
+                    o.setValue(out.getValue());
+                    o.setStdev(out.getStdev());
 
-                                r.add(o);
-                            }
-                        } else {
-                            r.setStatus("NoOutliers");
-                        }
-                    } else {
-                        r.setStatus(Messages.PROCESSING_ERROR);
-                    }
+                    outliers.add(o);
                 }
-                results.add(r);
             }
-
-            return Response.status(Status.OK).entity(results).build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
-        } catch (Exception e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
-    }
 
+        return Response.status(Status.OK).entity(outliers).build();
+    }
+    
     private TramoSpecification getSpecification(String spec) {
         switch (spec) {
             case "TR0":
@@ -174,53 +150,5 @@ public class AnomalyDetectionResource {
 
     private void setTransformation(TramoSpecification spec, String transform) {
         spec.getTransform().setFunction(DefaultTransformationType.valueOf(transform));
-    }
-
-    @POST
-    @Path("/new")
-    @Compress
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Process an outlier detection on a given Ts", notes = "Creates an outlier detection", response = ShadowOutlier.class)
-    @ApiResponses(
-            value = {
-                @ApiResponse(code = 200, message = "Successful processing of outlier detection", response = ShadowOutlier.class),
-                @ApiResponse(code = 400, message = "Bad request", response = String.class),
-                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
-            }
-    )
-    public Response outlierDetectionShadow(@ApiParam(name = "ShadowTs", required = true) ShadowTs ts) {
-        TramoSpecification spec = TramoSpecification.TRfull;
-        setShownOutliers(spec, true, true, true, true);
-        setTransformation(spec, "None");
-        spec.getOutliers().setCriticalValue(2.5);
-
-        List<ShadowOutlier> outliers = new ArrayList<>();
-
-        IPreprocessor processor = spec.build();
-
-        TsData tsData = RestUtils.createTsData(ts);
-
-        OutlierEstimation[] oe;
-        PreprocessingModel model = processor.process(tsData, null);
-        if (model != null) {
-            oe = model.outliersEstimation(true, false);
-
-            if (oe != null && oe.length > 0) {
-                for (OutlierEstimation out : oe) {
-                    ShadowOutlier o = new ShadowOutlier();
-                    int year = out.getPosition().getYear();
-                    int placeinyear = out.getPosition().getPosition();
-                    o.setPeriod(year * tsData.getFrequency().intValue() + placeinyear);
-                    o.setOutlierType(out.getCode());
-                    o.setValue(out.getValue());
-                    o.setStdev(out.getStdev());
-
-                    outliers.add(o);
-                }
-            }
-        }
-
-        return Response.status(Status.OK).entity(outliers).build();
     }
 }

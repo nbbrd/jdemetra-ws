@@ -16,7 +16,11 @@
  */
 package ec.nbb.demetra.rest;
 
+import ec.nbb.demetra.json.JsonTsCollection;
 import ec.nbb.ws.annotations.Compress;
+import ec.tss.TsCollectionInformation;
+import ec.tss.TsInformation;
+import ec.tss.xml.XmlTsCollection;
 import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
@@ -34,6 +38,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
+ * Resource that generates a random
+ * {@link ec.tstoolkit.timeseries.simplets.TsData} or
+ * {@link ec.tss.TsCollection}.
  *
  * @author Mats Maggi
  */
@@ -62,10 +69,46 @@ public class TsDataResource {
         } catch (IllegalArgumentException ex) {
             ts = TsData.random(TsFrequency.Monthly);
         }
-        
+
         XmlTsData json = new XmlTsData();
         json.copy(ts);
-        
+
+        return Response.ok().entity(json).build();
+    }
+
+    @GET
+    @Path("/collection")
+    @Compress
+    @Produces({MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Produces the JSON of a random TsCollection", notes = "Returns a random TsCollection of a given frequency", response = XmlTsCollection.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "TsData succesfully created", response = JsonTsCollection.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response randomCollection(
+            @ApiParam(value = "frequency", defaultValue = "12") @QueryParam(value = "frequency") @DefaultValue("12") int frequency,
+            @ApiParam(value = "nb", defaultValue = "10") @QueryParam(value = "nb") @DefaultValue("10") int nb) {
+        TsCollectionInformation ts = new TsCollectionInformation();
+        TsFrequency freq;
+        try {
+            freq = TsFrequency.valueOf(frequency);
+        } catch (IllegalArgumentException ex) {
+            freq = TsFrequency.Monthly;
+        }
+
+        for (int i = 0; i < nb; i++) {
+            TsInformation tsinfo = new TsInformation();
+            tsinfo.data = TsData.random(freq);
+            tsinfo.name = "Series " + i;
+            ts.items.add(tsinfo);
+        }
+
+        JsonTsCollection json = new JsonTsCollection();
+        json.from(ts);
+
         return Response.ok().entity(json).build();
     }
 }

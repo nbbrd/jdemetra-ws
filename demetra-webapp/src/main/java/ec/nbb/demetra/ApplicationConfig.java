@@ -43,6 +43,7 @@ public class ApplicationConfig extends Application {
         resources.add(org.glassfish.jersey.jackson.JacksonFeature.class);
         resources.add(ec.nbb.ws.filters.GZipWriterInterceptor.class);
         resources.add(ec.nbb.ws.filters.GZipReaderInterceptor.class);
+        resources.add(ec.nbb.demetra.filters.ChartBodyWriter.class);
 
         resources.add(ec.nbb.demetra.rest.TerrorResource.class);
         resources.add(ec.nbb.demetra.rest.AnomalyDetectionResource.class);
@@ -55,6 +56,7 @@ public class ApplicationConfig extends Application {
         resources.add(ec.nbb.demetra.rest.X13Resource.class);
         resources.add(ec.nbb.demetra.rest.HodrickPrescottResource.class);
         resources.add(ec.nbb.demetra.rest.TsDataResource.class);
+        resources.add(ec.nbb.demetra.rest.ChartResource.class);
 
         return resources;
     }
