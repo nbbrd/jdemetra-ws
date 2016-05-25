@@ -1,3 +1,9 @@
+##JDemetra+ Web Service
+
+This web service provides a way to interact with JDemetra+ algorithms over the REST technology.
+
+It is a free and open-source software (FOSS) developed under the [EUPL licence](http://ec.europa.eu/idabc/eupl).
+
 ##Client-side
 
 * Register `GZipEncoder.class` to deserialize response
