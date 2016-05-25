@@ -54,7 +54,7 @@ import javax.ws.rs.core.Response;
  */
 @Path("/chart")
 @Api(value = "/chart")
-@Consumes(MediaType.APPLICATION_JSON)
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 @Produces({"image/png", "image/jpeg", "image/svg+xml"})
 public class ChartResource {
 
@@ -81,7 +81,7 @@ public class ChartResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({"image/png", "image/jpeg", "image/svg+xml"})
     @ApiOperation(value = "Create a chart image from a given XmlTsData. Height, "
             + "width, color scheme, title and the visibility of the legend can be changed.")
@@ -115,7 +115,7 @@ public class ChartResource {
 
     private JTimeSeriesChart create(TsData data, String name, int width, int height, String colorScheme, String title, boolean legend) {
         TsXYDatasets.Builder rslt = TsXYDatasets.builder();
-        rslt.add(name, data);
+        rslt.add(Strings.isNullOrEmpty(name) ? "MySeries" : name, data);
 
         JTimeSeriesChart chart = new JTimeSeriesChart();
         chart.setSeriesRenderer(SeriesFunction.always(TimeSeriesChart.RendererType.SPLINE));

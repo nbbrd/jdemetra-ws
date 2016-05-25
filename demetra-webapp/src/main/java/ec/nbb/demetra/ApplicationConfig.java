@@ -47,7 +47,6 @@ public class ApplicationConfig extends Application {
 
         resources.add(ec.nbb.demetra.rest.TerrorResource.class);
         resources.add(ec.nbb.demetra.rest.AnomalyDetectionResource.class);
-        resources.add(ec.nbb.demetra.rest.SeasonalAdjustmentResource.class);
         resources.add(ec.nbb.demetra.rest.ForecastingResource.class);
         resources.add(ec.nbb.demetra.rest.CheckLastResource.class);
         resources.add(ec.nbb.demetra.rest.TestXmlResource.class);

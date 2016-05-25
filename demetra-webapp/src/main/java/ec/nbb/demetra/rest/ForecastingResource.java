@@ -17,11 +17,11 @@
 package ec.nbb.demetra.rest;
 
 import ec.nbb.demetra.Messages;
-import ec.nbb.ws.annotations.Compress;
-import ec.nbb.demetra.model.outlier.ShadowTs;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
+import ec.nbb.ws.annotations.Compress;
 import ec.satoolkit.tramoseats.TramoSeatsSpecification;
 import ec.satoolkit.x13.X13Specification;
+import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.algorithm.ProcessingContext;
 import ec.tstoolkit.modelling.arima.PreprocessingModel;
 import ec.tstoolkit.timeseries.simplets.TsData;
@@ -47,31 +47,31 @@ import javax.ws.rs.core.Response;
  */
 @Path("/forecast")
 @Api(value = "/forecast")
-@Consumes({MediaType.APPLICATION_JSON})
-@Produces({MediaType.APPLICATION_JSON})
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class ForecastingResource {
 
     @POST
     @Compress
     @Path("/{algorithm}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Returns the given series ", notes = "Only 'x13' and 'tramoseats' are currently supported", response = ShadowTs.class)
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @ApiOperation(value = "Returns the given series ", notes = "Only 'x13' and 'tramoseats' are currently supported", response = XmlTsData.class)
     @ApiResponses(
             value = {
-                @ApiResponse(code = 200, message = "Forecasting/Backcasting successfully done", response = ShadowTs.class),
+                @ApiResponse(code = 200, message = "Forecasting/Backcasting successfully done", response = XmlTsData.class),
                 @ApiResponse(code = 400, message = "Bad request", response = String.class),
                 @ApiResponse(code = 500, message = "Invalid request", response = String.class)
             }
     )
     public Response forecasting(
-            @ApiParam(value = "ts", required = true) ShadowTs ts,
+            @ApiParam(value = "ts", required = true) XmlTsData ts,
             @QueryParam(value = "start") @ApiParam(value = "start") int start,
             @QueryParam(value = "end") @ApiParam(value = "end") int end,
             @PathParam(value = "algorithm") @ApiParam(value = "algorithm", required = true) String algorithm,
             @QueryParam(value = "spec") @ApiParam(value = "spec") String spec) {
 
-        TsData tsData = RestUtils.createTsData(ts);
+        TsData tsData = ts.create();
         TsFrequency freq = tsData.getFrequency();
         int nb = 0, nf = 0;
         TsDomain dom = null;
@@ -119,7 +119,7 @@ public class ForecastingResource {
             if (dom != null) {
                 tsData = tsData.fittoDomain(dom);
             }
-            
+
             if (b != null) {
                 tsData = tsData.update(b);
             }
@@ -129,6 +129,9 @@ public class ForecastingResource {
             }
         }
 
-        return Response.ok().entity(RestUtils.toShadowTs(ts.getName(), tsData)).build();
+        XmlTsData result = new XmlTsData();
+        result.copy(tsData);
+        result.name = ts.name;
+        return Response.ok().entity(result).build();
     }
 }

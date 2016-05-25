@@ -49,13 +49,13 @@ import javax.ws.rs.core.Response;
  */
 @Path("/hodrickprescott")
 @Api(value = "/hodrickprescott")
-@Consumes({MediaType.APPLICATION_JSON})
-@Produces({MediaType.APPLICATION_JSON})
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class HodrickPrescottResource {
 
     @POST
     @Compress
-    @Consumes({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Hodrick Prescott on the given series. It returns the following series : Series, Cycle and Trend.", response = XmlTsData.class, responseContainer = "Map")
     @ApiResponses(
@@ -120,7 +120,7 @@ public class HodrickPrescottResource {
         if (targetData == null) {
             throw new IllegalArgumentException(String.format(Messages.UNKNOWN_TARGET, target));
         }
-        
+
         // Hendrick Prescott step
         TsData input = targetData.clone();
         if (mul) {
@@ -142,7 +142,7 @@ public class HodrickPrescottResource {
             XmlTsData trend = new XmlTsData();
             trend.copy(t);
             results.put("trend", trend);
-            
+
             TsData c = mul ? TsData.divide(targetData, t) : TsData.subtract(targetData, t);
             XmlTsData cycle = new XmlTsData();
             cycle.copy(c);

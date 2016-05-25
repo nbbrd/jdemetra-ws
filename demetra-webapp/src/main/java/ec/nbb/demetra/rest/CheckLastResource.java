@@ -51,14 +51,14 @@ import javax.ws.rs.core.Response;
  */
 @Path("/checklast")
 @Api(value = "/checklast")
-@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Consumes({MediaType.APPLICATION_JSON})
+@Produces({MediaType.APPLICATION_JSON})
 public class CheckLastResource {
 
     @POST
     @Compress
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Process a check last on a given Ts", notes = "Creates a check last processing.", response = TerrorResult.class)
     @ApiResponses(
             value = {
@@ -114,8 +114,8 @@ public class CheckLastResource {
     @POST
     @Path("/collection")
     @Compress
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Process a check last on a given list of Ts", notes = "Creates a check last processing.", response = TerrorResult.class, responseContainer = "List")
     @ApiResponses(
             value = {
@@ -179,8 +179,8 @@ public class CheckLastResource {
     @POST
     @Path("/com")
     @Compress
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Process a check last on a given Ts", notes = "Creates a check last processing.", response = TerrorResult.class)
     @ApiResponses(
             value = {

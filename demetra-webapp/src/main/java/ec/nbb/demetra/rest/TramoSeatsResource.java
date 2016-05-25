@@ -46,7 +46,7 @@ import javax.ws.rs.core.Response;
  */
 @Path("/tramoseats")
 @Api(value = "/tramoseats")
-@Consumes({MediaType.APPLICATION_JSON})
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 @Produces({MediaType.APPLICATION_JSON})
 public class TramoSeatsResource {
 
@@ -54,7 +54,7 @@ public class TramoSeatsResource {
     
     @POST
     @Compress
-    @Consumes({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Returns the components of the TramoSeats processing of the given series", response = XmlTsData.class, responseContainer = "Map")
     @ApiResponses(

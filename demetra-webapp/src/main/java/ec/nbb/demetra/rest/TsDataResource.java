@@ -20,7 +20,6 @@ import ec.nbb.demetra.json.JsonTsCollection;
 import ec.nbb.ws.annotations.Compress;
 import ec.tss.TsCollectionInformation;
 import ec.tss.TsInformation;
-import ec.tss.xml.XmlTsCollection;
 import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
@@ -46,12 +45,12 @@ import javax.ws.rs.core.Response;
  */
 @Path("/tsdata")
 @Api(value = "/tsdata")
-@Produces({MediaType.APPLICATION_JSON})
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class TsDataResource {
 
     @GET
     @Compress
-    @Produces({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @ApiOperation(value = "Produces the JSON of a random TsData", notes = "Returns a random TsData of a given frequency", response = XmlTsData.class)
     @ApiResponses(
             value = {
@@ -80,7 +79,7 @@ public class TsDataResource {
     @Path("/collection")
     @Compress
     @Produces({MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Produces the JSON of a random TsCollection", notes = "Returns a random TsCollection of a given frequency", response = XmlTsCollection.class)
+    @ApiOperation(value = "Produces the JSON of a random TsCollection", notes = "Returns a random TsCollection of a given frequency", response = JsonTsCollection.class)
     @ApiResponses(
             value = {
                 @ApiResponse(code = 200, message = "TsData succesfully created", response = JsonTsCollection.class),

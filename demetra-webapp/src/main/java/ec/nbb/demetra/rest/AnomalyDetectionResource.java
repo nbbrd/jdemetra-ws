@@ -52,12 +52,12 @@ import javax.ws.rs.core.Response.Status;
 @Path("/outlier")
 @Api(value = "/outlier")
 @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+@Produces({MediaType.APPLICATION_XML})
 public class AnomalyDetectionResource {
 
     @POST
     @Compress
-    @Consumes({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Process an outlier detection on a given Ts", notes = "Creates an outlier detection", response = ShadowOutlier.class, responseContainer = "List")
     @ApiResponses(

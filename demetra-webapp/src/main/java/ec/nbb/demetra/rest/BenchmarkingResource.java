@@ -22,11 +22,11 @@ import ec.benchmarking.simplets.TsDenton2;
 import ec.benchmarking.simplets.TsExpander;
 import ec.benchmarking.simplets.TsExpander.Model;
 import ec.nbb.demetra.Messages;
-import ec.nbb.ws.annotations.Compress;
 import ec.nbb.demetra.json.benchmarking.JsonCholetteProcessing;
 import ec.nbb.demetra.json.benchmarking.JsonDentonProcessing;
 import ec.nbb.demetra.json.benchmarking.JsonExpanderProcessing;
 import ec.nbb.demetra.json.benchmarking.JsonSsfDentonProcessing;
+import ec.nbb.ws.annotations.Compress;
 import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
@@ -48,15 +48,15 @@ import javax.ws.rs.core.Response;
  */
 @Path("/benchmarking")
 @Api(value = "/benchmarking", hidden = false)
-@Consumes({MediaType.APPLICATION_JSON})
-@Produces({MediaType.APPLICATION_JSON})
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class BenchmarkingResource {
 
     @POST
     @Compress
     @Path("/denton")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @ApiOperation(value = "Denton processing", notes = "Computes a Denton Processing on a given series", response = XmlTsData.class)
     @ApiResponses(
             value = {
@@ -91,8 +91,8 @@ public class BenchmarkingResource {
     @POST
     @Compress
     @Path("/ssfdenton")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @ApiOperation(value = "Ssf Denton processing", notes = "Computes a Ssf Denton Processing on a given series", response = XmlTsData.class)
     @ApiResponses(
             value = {
@@ -119,8 +119,8 @@ public class BenchmarkingResource {
     @POST
     @Compress
     @Path("/cholette")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @ApiOperation(value = "Cholette processing", notes = "Computes a Cholette Processing on a given series", response = XmlTsData.class)
     @ApiResponses(
             value = {
@@ -149,8 +149,8 @@ public class BenchmarkingResource {
     @POST
     @Compress
     @Path("/expander")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @ApiOperation(value = "Expander processing", notes = "Computes a Expander Processing on a given series", response = XmlTsData.class)
     @ApiResponses(
             value = {
