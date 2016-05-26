@@ -17,16 +17,10 @@
 package ec.nbb.demetra.rest.test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.base.Strings;
-import ec.nbb.demetra.model.outlier.ShadowTs;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
-import ec.tstoolkit.timeseries.TsAggregationType;
+import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
-import ec.tstoolkit.timeseries.simplets.TsPeriod;
-import io.swagger.util.Json;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -46,9 +40,9 @@ public class ForecastingTest {
     @Test
     public void forecastingSameDomain() throws JsonProcessingException {
         TsData d = TsData.random(TsFrequency.Monthly);
-        ShadowTs ts = RestUtils.toShadowTs("Blabla", d);
-        ts.setAggregationMethod(TsAggregationType.None);
-        ts.setFreq(d.getFrequency().intValue());
+        XmlTsData ts = new XmlTsData();
+        ts.name = "Blabla";
+        ts.copy(d);
         int start = RestUtils.fromTsPeriod(d.getStart());
         int end = RestUtils.fromTsPeriod(d.getEnd());
 
@@ -56,70 +50,52 @@ public class ForecastingTest {
         Assert.assertNotNull(resp);
         Assert.assertEquals(200, resp.getStatus());
 
-        ShadowTs responseTs = resp.readEntity(ShadowTs.class);
+        XmlTsData responseTs = resp.readEntity(XmlTsData.class);
         Assert.assertNotNull(responseTs);
-        Assert.assertEquals("Blabla", responseTs.getName());
-        Assert.assertArrayEquals(ts.getValues(), responseTs.getValues(), 0);
-        Assert.assertArrayEquals(ts.getPeriods(), responseTs.getPeriods());
+        Assert.assertEquals("Blabla", responseTs.name);
+
+        TsData resultTsData = responseTs.create();
+        Assert.assertEquals(d.getValues().getLength(), resultTsData.getValues().getLength());
+        Assert.assertTrue(d.getDomain().equals(resultTsData.getDomain()));
     }
 
     @Test
     public void backcasting() throws JsonProcessingException {
         TsData d = TsData.random(TsFrequency.Quarterly);
-        ShadowTs ts = RestUtils.toShadowTs("Blabla", d);
-        ts.setAggregationMethod(TsAggregationType.None);
-        ts.setFreq(d.getFrequency().intValue());
+        XmlTsData ts = new XmlTsData();
+        ts.name = "Blabla";
+        ts.copy(d);
+
         int start = RestUtils.fromTsPeriod(d.getStart().minus(10));
         int end = RestUtils.fromTsPeriod(d.getEnd());
-        
+
         Response resp = callWS(ts, start, end);
 
         Assert.assertNotNull(resp);
         Assert.assertEquals(200, resp.getStatus());
-        ShadowTs responseTs = resp.readEntity(ShadowTs.class);
+        XmlTsData responseTs = resp.readEntity(XmlTsData.class);
         Assert.assertNotNull(responseTs);
-        Assert.assertEquals("Blabla", responseTs.getName());
-        Assert.assertEquals(ts.getPeriods().length + 10, responseTs.getPeriods().length);
-        Assert.assertEquals(responseTs.getPeriods().length, responseTs.getValues().length);
-        TsPeriod responseStart = RestUtils.toPeriod(responseTs.getPeriods()[0], TsFrequency.Quarterly);
-        TsPeriod requestStart = RestUtils.toPeriod(start, TsFrequency.Quarterly);
-        Assert.assertEquals(responseStart, requestStart);
-        
+        Assert.assertEquals("Blabla", responseTs.name);
+
+        TsData resultTsData = responseTs.create();
+        Assert.assertEquals(d.getObsCount() + 10, resultTsData.getObsCount());
+        Assert.assertTrue(d.getEnd().equals(resultTsData.getEnd())); // Backcast so end unchanged
     }
 
-    private Response callWS(ShadowTs ts, int start, int end) {
+    private Response callWS(XmlTsData ts, int start, int end) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
         JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
         //JerseyWebTarget jwt = jc.target("https://pc0021770.nbb.local:8181/demetra/api"); // Needs installation of certificate
-        Response resp = jwt.path("forecast/tramoseats")
+        Response resp = jwt.path("forecast")
                 .queryParam("start", start)
                 .queryParam("end", end)
                 .request(MediaType.APPLICATION_JSON)
                 .acceptEncoding("gzip")
-                .post(Entity.entity(ts, MediaType.APPLICATION_JSON));
+                .post(Entity.entity(ts, MediaType.APPLICATION_XML));
 
         return resp;
-    }
-
-    @Test
-    public void createShadowTs() {
-        try {
-            ShadowTs[] ts = new ShadowTs[1000];
-            for (int i = 0; i < ts.length; i++) {
-                TsData d = TsData.random(TsFrequency.Monthly);
-                
-                ts[i] = RestUtils.toShadowTs("Blabla" + i, d);
-                ts[i].setAggregationMethod(TsAggregationType.None);
-                ts[i].setFreq(d.getFrequency().intValue());
-            }
-            
-            String json = Json.mapper().writeValueAsString(ts);
-            Assert.assertFalse(Strings.isNullOrEmpty(json));
-        } catch (JsonProcessingException ex) {
-            Logger.getLogger(ForecastingTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 }

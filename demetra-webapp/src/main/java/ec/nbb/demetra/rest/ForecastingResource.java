@@ -33,9 +33,9 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -53,7 +53,6 @@ public class ForecastingResource {
 
     @POST
     @Compress
-    @Path("/{algorithm}")
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @ApiOperation(value = "Returns the given series ", notes = "Only 'x13' and 'tramoseats' are currently supported", response = XmlTsData.class)
@@ -68,8 +67,8 @@ public class ForecastingResource {
             @ApiParam(value = "ts", required = true) XmlTsData ts,
             @QueryParam(value = "start") @ApiParam(value = "start") int start,
             @QueryParam(value = "end") @ApiParam(value = "end") int end,
-            @PathParam(value = "algorithm") @ApiParam(value = "algorithm", required = true) String algorithm,
-            @QueryParam(value = "spec") @ApiParam(value = "spec") String spec) {
+            @QueryParam(value = "algorithm") @ApiParam(value = "algorithm", defaultValue = "tramoseats") @DefaultValue("tramoseats") String algorithm,
+            @QueryParam(value = "spec") @ApiParam(value = "spec",  defaultValue = "RSAfull") @DefaultValue("RSAfull") String spec) {
 
         TsData tsData = ts.create();
         TsFrequency freq = tsData.getFrequency();
@@ -86,21 +85,11 @@ public class ForecastingResource {
         PreprocessingModel model = null;
         switch (algorithm.toLowerCase()) {
             case "tramoseats":
-                TramoSeatsSpecification s;
-                if (spec != null && !spec.isEmpty()) {
-                    s = TramoSeatsSpecification.fromString(spec);
-                } else {
-                    s = TramoSeatsSpecification.RSAfull;
-                }
+                TramoSeatsSpecification s = TramoSeatsSpecification.fromString(spec);
                 model = s.buildPreprocessor(new ProcessingContext()).process(tsData, null);
                 break;
             case "x13":
-                X13Specification sx;
-                if (spec != null && !spec.isEmpty()) {
-                    sx = X13Specification.fromString(spec);
-                } else {
-                    sx = X13Specification.RSA5;
-                }
+                X13Specification sx = X13Specification.fromString(spec);
                 model = sx.buildPreprocessor().process(tsData, null);
                 break;
             default:

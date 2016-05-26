@@ -59,6 +59,7 @@ import javax.ws.rs.core.Response;
 public class ChartResource {
 
     @GET
+    @Path("/random")
     @Produces({"image/png", "image/jpeg", "image/svg+xml"})
     @ApiOperation(value = "Create a chart image from a randomly generated series. Height, "
             + "width, color scheme, title and the visibility of the legend can be changed.")
@@ -80,6 +81,25 @@ public class ChartResource {
         return Response.ok().entity(chart).build();
     }
 
+    /**
+     * Creates a chart from a given XmlTsData. The created chart can be
+     * customized by passing parameters to the call. <br><br>
+     *
+     * <b>ATTENTION !</b> There's currently a bug when using this method with
+     * Swagger UI in a web browser. The browser, when trying to display the
+     * created image after a POST call, makes a GET call that returns a plain
+     * text. The browser uses that second response that is not displayable as an
+     * image. Anyway, that method works fine when used programmatically.
+     *
+     * @param xmlTsData TsData to be displayed into the chart
+     * @param width Width of the created image
+     * @param height Height of the created image
+     * @param colorScheme Color Scheme name (same as in JDemetra+)
+     * @param title Title of the chart (if omitted, the title isn't displayed)
+     * @param legendVisible True if the legend has to be displayed
+     * @return The created image of the chart
+     * @throws IOException
+     */
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({"image/png", "image/jpeg", "image/svg+xml"})

@@ -33,8 +33,7 @@ public class Main {
     public static final int DEFAULT_PORT = 9998;
 
     public static HttpServer startServer(int port) {
-        // create a resource config that scans for JAX-RS resources and providers
-        // in com.example.rest package
+
         final ResourceConfig rc = new ResourceConfig()
                 .packages("ec.nbb.demetra.rest")
                 .register(ec.nbb.demetra.exception.DemetraExceptionMapper.class)

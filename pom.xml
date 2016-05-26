@@ -17,7 +17,7 @@
         <ws-version>0.0.1</ws-version>
         <junit-version>4.12</junit-version>
         <version.jersey>2.21</version.jersey>
-        <swagger.version>1.5.8</swagger.version>
+        <swagger.version>1.5.9</swagger.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>

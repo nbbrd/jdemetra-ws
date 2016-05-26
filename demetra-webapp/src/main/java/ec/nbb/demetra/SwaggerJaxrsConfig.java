@@ -36,7 +36,7 @@ public class SwaggerJaxrsConfig extends HttpServlet {
         try {
             super.init(servletConfig);
             BeanConfig beanConfig = new BeanConfig();
-            beanConfig.setVersion("1.0.0");
+            beanConfig.setVersion("1.1.0");
             beanConfig.setSchemes(new String[]{"http"});
             beanConfig.setHost("localhost:9998");
             beanConfig.setPrettyPrint(true);

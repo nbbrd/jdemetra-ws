@@ -22,24 +22,42 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
+ * Object used to hold the results of a CheckLast
  *
  * @author Mats Maggi
  */
 @ApiModel
 @XmlRootElement(name = "TerrorResult")
-@XmlAccessorType(XmlAccessType.NONE)
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "TerrorResultType")
 public class TerrorResult {
 
+    @ApiModelProperty(required = true)
     @JsonProperty(value = "Name")
+    @XmlElement
     private String name;
+
+    @ApiModelProperty(required = true)
     @JsonProperty(value = "Value")
+    @XmlElement
+    @XmlList
     private double[] value;
+
+    @ApiModelProperty(required = true)
     @JsonProperty(value = "Forecast")
+    @XmlElement
+    @XmlList
     private double[] forecast;
+
+    @ApiModelProperty(required = true)
     @JsonProperty(value = "Score")
+    @XmlElement
+    @XmlList
     private double[] score;
 
     public TerrorResult(String name, double[] value, double[] forecast, double[] score) {
@@ -49,58 +67,40 @@ public class TerrorResult {
         this.score = score;
     }
 
-    public TerrorResult(String name) {
-        this.name = name;
-    }
-
     public TerrorResult() {
     }
 
-    @ApiModelProperty(required = true)
-    @XmlElement(name = "forecast", required = true)
-    @JsonProperty(value = "Forecast")
-    public double[] getForecast() {
-        return forecast;
-    }
-
-    @ApiModelProperty(required = true)
-    @XmlElement(name = "score", required = true)
-    @JsonProperty(value = "Score")
-    public double[] getScore() {
-        return score;
-    }
-
-    @ApiModelProperty(required = true)
-    @XmlElement(name = "value", required = true)
-    @JsonProperty(value = "Value")
-    public double[] getValue() {
-        return value;
-    }
-
-    @ApiModelProperty(required = true)
-    @XmlElement(name = "name", nillable = false, required = true)
-    @JsonProperty(value = "Name")
     public String getName() {
         return name;
     }
 
-    @JsonProperty(value = "Name")
     public void setName(String name) {
         this.name = name;
     }
 
-    @JsonProperty(value = "Forecast")
+    public double[] getValue() {
+        return value;
+    }
+
+    public void setValue(double[] value) {
+        this.value = value;
+    }
+
+    public double[] getForecast() {
+        return forecast;
+    }
+
     public void setForecast(double[] forecast) {
         this.forecast = forecast;
     }
 
-    @JsonProperty(value = "Score")
+    public double[] getScore() {
+        return score;
+    }
+
     public void setScore(double[] score) {
         this.score = score;
     }
-
-    @JsonProperty(value = "Value")
-    public void setValue(double[] value) {
-        this.value = value;
-    }
+    
+    
 }

@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>ec.nbb.demetra</groupId>
-            <artifactId>JDemetraWS-web</artifactId>
+            <artifactId>webapp</artifactId>
             <version>${demetraws-version}</version>
             <classifier>classes</classifier>
         </dependency>

@@ -21,60 +21,68 @@ import ec.tss.xml.XmlTsPeriod;
 import ec.tstoolkit.timeseries.regression.OutlierType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
+ * POJO definition of an outlier used for serialization
  *
  * @author Mats Maggi
  */
-@ApiModel(description = "Json definition of an outlier")
+@ApiModel(description = "POJO definition of an outlier used for serialization")
+@XmlRootElement(name = "ShadowOutlier")
+@XmlType(name = "ShadowOutlierType")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ShadowOutlier {
 
     @ApiModelProperty(notes = "OutlierType", allowableValues = "AO, SO, LS, TC")
     @JsonProperty(value = "OutlierType")
+    @XmlElement
     private OutlierType outlierType;
+
     @JsonProperty(value = "Period")
+    @XmlElement
     private XmlTsPeriod period;
+
     @JsonProperty(value = "Value")
+    @XmlElement
     public double value;
+
     @JsonProperty(value = "StDev")
+    @XmlElement
     public double stdev;
 
-    @JsonProperty(value = "OutlierType")
     public OutlierType getOutlierType() {
         return outlierType;
     }
 
-    @JsonProperty(value = "OutlierType")
     public void setOutlierType(OutlierType outlierType) {
         this.outlierType = outlierType;
     }
 
-    @JsonProperty(value = "Period")
     public XmlTsPeriod getPeriod() {
         return period;
     }
 
-    @JsonProperty(value = "Period")
     public void setPeriod(XmlTsPeriod period) {
         this.period = period;
     }
 
-    @JsonProperty(value = "Value")
     public double getValue() {
         return value;
     }
 
-    @JsonProperty(value = "Value")
     public void setValue(double value) {
         this.value = value;
     }
 
-    @JsonProperty(value = "StDev")
     public double getStdev() {
         return stdev;
     }
 
-    @JsonProperty(value = "StDev")
     public void setStdev(double stdev) {
         this.stdev = stdev;
     }

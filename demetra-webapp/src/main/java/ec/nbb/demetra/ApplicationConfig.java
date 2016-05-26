@@ -45,11 +45,9 @@ public class ApplicationConfig extends Application {
         resources.add(ec.nbb.ws.filters.GZipReaderInterceptor.class);
         resources.add(ec.nbb.demetra.filters.ChartBodyWriter.class);
 
-        resources.add(ec.nbb.demetra.rest.TerrorResource.class);
         resources.add(ec.nbb.demetra.rest.AnomalyDetectionResource.class);
         resources.add(ec.nbb.demetra.rest.ForecastingResource.class);
         resources.add(ec.nbb.demetra.rest.CheckLastResource.class);
-        resources.add(ec.nbb.demetra.rest.TestXmlResource.class);
         resources.add(ec.nbb.demetra.rest.BenchmarkingResource.class);
         resources.add(ec.nbb.demetra.rest.TramoSeatsResource.class);
         resources.add(ec.nbb.demetra.rest.X13Resource.class);

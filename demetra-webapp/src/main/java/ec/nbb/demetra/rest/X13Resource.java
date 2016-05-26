@@ -47,7 +47,7 @@ import javax.ws.rs.core.Response;
 @Path("/x13")
 @Api(value = "/x13")
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-@Produces({MediaType.APPLICATION_JSON})
+@Produces(MediaType.APPLICATION_JSON)
 public class X13Resource {
 
     private final String[] components = {"sa", "t", "s", "i", "y_f"};
@@ -55,7 +55,7 @@ public class X13Resource {
     @POST
     @Compress
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Returns the components of the X13 processing of the given series", response = XmlTsData.class, responseContainer = "Map")
     @ApiResponses(
             value = {

@@ -43,7 +43,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 /**
  *
@@ -51,14 +50,14 @@ import javax.ws.rs.core.Response.Status;
  */
 @Path("/outlier")
 @Api(value = "/outlier")
-@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-@Produces({MediaType.APPLICATION_XML})
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class AnomalyDetectionResource {
 
     @POST
     @Compress
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @ApiOperation(value = "Process an outlier detection on a given Ts", notes = "Creates an outlier detection", response = ShadowOutlier.class, responseContainer = "List")
     @ApiResponses(
             value = {
@@ -71,7 +70,7 @@ public class AnomalyDetectionResource {
             @ApiParam(name = "transformation", defaultValue = "None", allowableValues = "None,Auto,Log") @QueryParam(value = "transformation") @DefaultValue("None") String transformation,
             @ApiParam(name = "critical", defaultValue = "2.5") @QueryParam(value = "critical") @DefaultValue("2.5") double cv,
             @ApiParam(name = "spec", defaultValue = "TRfull") @QueryParam(value = "spec") @DefaultValue("TRfull") String spec) {
-        
+
         TramoSpecification tramoSpec = getSpecification(spec);
         setShownOutliers(tramoSpec, true, true, true, true);
         setTransformation(tramoSpec, transformation);
@@ -103,9 +102,9 @@ public class AnomalyDetectionResource {
             }
         }
 
-        return Response.status(Status.OK).entity(outliers).build();
+        return Response.ok().entity(outliers).build();
     }
-    
+
     private TramoSpecification getSpecification(String spec) {
         switch (spec) {
             case "TR0":
