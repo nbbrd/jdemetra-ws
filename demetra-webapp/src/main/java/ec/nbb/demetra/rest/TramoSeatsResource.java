@@ -65,7 +65,7 @@ public class TramoSeatsResource {
             }
     )
     public Response tramoSeats(@ApiParam(name = "tsData", required = true) XmlTsData tsData,
-            @ApiParam(name = "spec", defaultValue = "RSA4") @QueryParam(value = "spec") @DefaultValue("RSA4") String spec) {
+            @ApiParam(name = "spec", defaultValue = "RSAfull") @QueryParam(value = "spec") @DefaultValue("RSAfull") String spec) {
         CompositeResults results = null;
         TramoSeatsSpecification specification;
         Map<String, XmlTsData> compMap = new HashMap<>();

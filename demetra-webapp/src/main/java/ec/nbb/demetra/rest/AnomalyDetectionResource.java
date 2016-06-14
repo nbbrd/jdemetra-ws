@@ -68,7 +68,7 @@ public class AnomalyDetectionResource {
     )
     public Response outlierDetectionShadow(@ApiParam(name = "ts", required = true) XmlTsData ts,
             @ApiParam(name = "transformation", defaultValue = "None", allowableValues = "None,Auto,Log") @QueryParam(value = "transformation") @DefaultValue("None") String transformation,
-            @ApiParam(name = "critical", defaultValue = "2.5") @QueryParam(value = "critical") @DefaultValue("2.5") double cv,
+            @ApiParam(name = "critical", defaultValue = "0") @QueryParam(value = "critical") @DefaultValue("0") double cv,
             @ApiParam(name = "spec", defaultValue = "TRfull") @QueryParam(value = "spec") @DefaultValue("TRfull") String spec) {
 
         TramoSpecification tramoSpec = getSpecification(spec);
