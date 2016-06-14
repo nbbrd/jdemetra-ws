@@ -86,34 +86,38 @@ public class HodrickPrescottResource {
         }
 
         // Seasonal Adjustment step
-        CompositeResults saResults = new CompositeResults();
+        CompositeResults saResults = null;
         switch (method.toLowerCase()) {
             case "tramoseats":
                 TramoSeatsSpecification s = TramoSeatsSpecification.fromString(spec == null ? "" : spec);
                 saResults = TramoSeatsProcessingFactory.process(data, s);
+                if (saResults == null) {
+                    throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
+                }
                 break;
             case "x13":
                 X13Specification sx = X13Specification.fromString(spec == null ? "" : spec);
                 saResults = X13ProcessingFactory.process(data, sx);
+                if (saResults == null) {
+                    throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
+                }
+                break;
+            case "none":
                 break;
             default:
                 throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, method.toLowerCase()));
         }
 
-        if (saResults == null) {
-            throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
-        }
-
         TsData targetData = null;
         switch (target.toLowerCase()) {
             case "original":
-                targetData = saResults.getData("s", TsData.class);
+                targetData = data;
                 break;
             case "trend":
-                targetData = saResults.getData("t", TsData.class);
+                targetData = saResults != null ? saResults.getData("t", TsData.class) : null;
                 break;
             case "sa":
-                targetData = saResults.getData("sa", TsData.class);
+                targetData = saResults != null ? saResults.getData("sa", TsData.class) : null;
                 break;
         }
 
@@ -129,6 +133,8 @@ public class HodrickPrescottResource {
         HodrickPrescott hp = new HodrickPrescott();
         if (lcycle != 0) {
             lambda = defaultLambda(lcycle, targetData.getFrequency().intValue());
+        } else if (deflambda) {
+            lambda = defaultLambda(8, targetData.getFrequency().intValue());
         }
         hp.setLambda(lambda);
 
