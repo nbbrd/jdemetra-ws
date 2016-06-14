@@ -68,7 +68,7 @@ public class CheckLastResource {
             @ApiParam(name = "ts", required = true) XmlTsData ts,
             @ApiParam(name = "nbLast", required = true, defaultValue = "1") @QueryParam("nbLast") @DefaultValue("1") int nbLast,
             @ApiParam(name = "algorithm", defaultValue = "tramoseats") @QueryParam("algorithm") @DefaultValue("tramoseats") String algorithm,
-            @ApiParam(name = "spec", defaultValue = "TRfull") @QueryParam("spec") @DefaultValue("RSAfull") String spec) {
+            @ApiParam(name = "spec", defaultValue = "TRfull") @QueryParam("spec") @DefaultValue("TRfull") String spec) {
         IPreprocessor p;
 
         if (ts == null) {
@@ -129,7 +129,7 @@ public class CheckLastResource {
             @ApiParam(name = "tsCollection", required = true) XmlTsData[] tsCollection,
             @ApiParam(name = "nbLast", required = true) @QueryParam("nbLast") @DefaultValue("1") int nbLast,
             @ApiParam(name = "algorithm") @QueryParam("algorithm") @DefaultValue("tramoseats") String algorithm,
-            @ApiParam(name = "spec") @QueryParam("spec") @DefaultValue("RSAfull") String spec) {
+            @ApiParam(name = "spec", defaultValue = "TRfull") @QueryParam("spec") @DefaultValue("TRfull") String spec) {
         IPreprocessor p = null;
         List<TerrorResult> results = new ArrayList<>();
 

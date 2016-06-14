@@ -88,7 +88,6 @@ public class ForecastingTest {
         JerseyClient jc = jcb.build();
 
         JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
-        //JerseyWebTarget jwt = jc.target("https://pc0021770.nbb.local:8181/demetra/api"); // Needs installation of certificate
         Response resp = jwt.path("forecast")
                 .queryParam("start", start)
                 .queryParam("end", end)

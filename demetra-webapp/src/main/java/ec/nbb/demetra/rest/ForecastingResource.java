@@ -19,11 +19,10 @@ package ec.nbb.demetra.rest;
 import ec.nbb.demetra.Messages;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
 import ec.nbb.ws.annotations.Compress;
-import ec.satoolkit.tramoseats.TramoSeatsSpecification;
-import ec.satoolkit.x13.X13Specification;
 import ec.tss.xml.XmlTsData;
-import ec.tstoolkit.algorithm.ProcessingContext;
 import ec.tstoolkit.modelling.arima.PreprocessingModel;
+import ec.tstoolkit.modelling.arima.tramo.TramoSpecification;
+import ec.tstoolkit.modelling.arima.x13.RegArimaSpecification;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsDomain;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
@@ -68,7 +67,7 @@ public class ForecastingResource {
             @QueryParam(value = "start") @ApiParam(value = "start") int start,
             @QueryParam(value = "end") @ApiParam(value = "end") int end,
             @QueryParam(value = "algorithm") @ApiParam(value = "algorithm", defaultValue = "tramoseats") @DefaultValue("tramoseats") String algorithm,
-            @QueryParam(value = "spec") @ApiParam(value = "spec",  defaultValue = "RSAfull") @DefaultValue("RSAfull") String spec) {
+            @QueryParam(value = "spec") @ApiParam(value = "spec",  defaultValue = "TRfull") @DefaultValue("TRfull") String spec) {
 
         TsData tsData = ts.create();
         TsFrequency freq = tsData.getFrequency();
@@ -81,16 +80,16 @@ public class ForecastingResource {
         }
 
         TsData b = null, f = null;
-
+        
+        spec = mapSpec(algorithm, spec);
+        
         PreprocessingModel model = null;
         switch (algorithm.toLowerCase()) {
             case "tramoseats":
-                TramoSeatsSpecification s = TramoSeatsSpecification.fromString(spec);
-                model = s.buildPreprocessor(new ProcessingContext()).process(tsData, null);
+                model = TramoSpecification.defaultPreprocessor(TramoSpecification.Default.valueOfIgnoreCase(spec)).process(tsData, null);
                 break;
             case "x13":
-                X13Specification sx = X13Specification.fromString(spec);
-                model = sx.buildPreprocessor().process(tsData, null);
+                model = RegArimaSpecification.defaultPreprocessor(RegArimaSpecification.Default.valueOf(spec)).process(tsData, null);
                 break;
             default:
                 throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, algorithm));
@@ -122,5 +121,9 @@ public class ForecastingResource {
         result.copy(tsData);
         result.name = ts.name;
         return Response.ok().entity(result).build();
+    }
+    
+    private String mapSpec(String algo, String spec) {
+        return spec.toUpperCase().replace("RSA", algo.toLowerCase().equals("tramoseats") ? "TR" : "RG");
     }
 }
