@@ -54,6 +54,7 @@ public class ApplicationConfig extends Application {
         resources.add(ec.nbb.demetra.rest.HodrickPrescottResource.class);
         resources.add(ec.nbb.demetra.rest.TsDataResource.class);
         resources.add(ec.nbb.demetra.rest.ChartResource.class);
+        resources.add(ec.nbb.demetra.rest.TestXmlResource.class);
 
         return resources;
     }

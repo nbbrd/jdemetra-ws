@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.javax-servlet>3.1.0</version.javax-servlet>
         <version.jetty>9.2.7.v20150116</version.jetty>        
-        <demetra.version>2.1.0</demetra.version>
+        <demetra.version>2.2.0-SNAPSHOT</demetra.version>
     </properties>
     
     <dependencyManagement>

@@ -17,11 +17,16 @@
 package ec.nbb.demetra.rest;
 
 import com.google.common.base.Strings;
+import ec.demetra.xml.core.XmlInformationSet;
+import ec.demetra.xml.sa.tramoseats.TramoSeatsXmlProcessor;
+import ec.demetra.xml.sa.tramoseats.XmlTramoSeatsRequest;
+import ec.demetra.xml.sa.tramoseats.XmlTramoSeatsRequests;
 import ec.nbb.demetra.Messages;
 import ec.nbb.ws.annotations.Compress;
 import ec.satoolkit.algorithm.implementation.TramoSeatsProcessingFactory;
 import ec.satoolkit.tramoseats.TramoSeatsSpecification;
 import ec.tss.xml.XmlTsData;
+import ec.tss.xml.tramoseats.XmlTramoSeatsSpecification;
 import ec.tstoolkit.algorithm.CompositeResults;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import io.swagger.annotations.Api;
@@ -33,8 +38,10 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -97,5 +104,78 @@ public class TramoSeatsResource {
         }
         
         return Response.ok().entity(compMap).build();
+    }
+    
+    @GET
+    @Path("{spec}")
+    @Compress
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @ApiOperation(value = "Returns the specification schema from a given specification name", response = XmlTramoSeatsSpecification.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "TramoSeats specification schema was successfully returned", response = XmlTramoSeatsSpecification.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response tramoseatsSpec(@PathParam("spec") String spec) {
+        TramoSeatsSpecification specification;
+        if (Strings.isNullOrEmpty(spec)) {
+            throw new IllegalArgumentException(String.format(Messages.UNKNOWN_SPEC, spec));
+        } else {
+            specification = TramoSeatsSpecification.fromString(spec);
+        }
+        
+        XmlTramoSeatsSpecification xml = new XmlTramoSeatsSpecification();
+        xml.copy(specification);
+        
+        return Response.ok().entity(xml).build();
+    }
+    
+    @POST
+    @Compress
+    @Path("/request")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    @ApiOperation(value = "Returns the requested components of the TramoSeats processing of the given series", response = XmlInformationSet.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "TramoSeats was successfully processed", response = XmlInformationSet.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response tramoSeats(@ApiParam(name = "request", required = true) XmlTramoSeatsRequest request) {
+        TramoSeatsXmlProcessor processor = new TramoSeatsXmlProcessor();
+        XmlInformationSet set = processor.process(request);
+        if (set == null) {
+            throw new IllegalArgumentException("Unable to process the request, please check your inputs.");
+        }
+        
+        return Response.ok().entity(set).build();
+    }
+    
+    @POST
+    @Compress
+    @Path("requests")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    @ApiOperation(value = "Returns the requested components of the TramoSeats processing of the given series", response = XmlInformationSet.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "TramoSeats was successfully processed", response = XmlInformationSet.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response tramoSeats(@ApiParam(name = "requests", required = true) XmlTramoSeatsRequests requests) {
+        TramoSeatsXmlProcessor processor = new TramoSeatsXmlProcessor();
+        XmlInformationSet set = processor.process(requests);
+        if (set == null) {
+            throw new IllegalArgumentException("Unable to process the request, please check your inputs.");
+        }
+        
+        return Response.ok().entity(set).build();
     }
 }

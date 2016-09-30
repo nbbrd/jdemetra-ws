@@ -93,7 +93,7 @@ public class AnomalyDetectionResource {
                     XmlTsPeriod period = new XmlTsPeriod();
                     period.copy(out.getPosition());
                     o.setPeriod(period);
-                    o.setOutlierType(out.getCode());
+                    o.setOutlierType(OutlierType.valueOf(out.getCode()));
                     o.setValue(out.getValue());
                     o.setStdev(out.getStdev());
 

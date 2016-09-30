@@ -17,24 +17,30 @@
 package ec.nbb.demetra.rest;
 
 import com.google.common.base.Strings;
+import ec.demetra.xml.sa.x13.X13XmlProcessor;
+import ec.demetra.xml.sa.x13.XmlX13Request;
+import ec.demetra.xml.sa.x13.XmlX13Requests;
 import ec.nbb.demetra.Messages;
 import ec.nbb.ws.annotations.Compress;
 import ec.satoolkit.algorithm.implementation.X13ProcessingFactory;
 import ec.satoolkit.x13.X13Specification;
 import ec.tss.xml.XmlTsData;
+import ec.tss.xml.information.XmlInformationSet;
+import ec.tss.xml.x13.XmlX13Specification;
 import ec.tstoolkit.algorithm.CompositeResults;
+import ec.tstoolkit.information.InformationSet;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.HashMap;
-import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -56,10 +62,10 @@ public class X13Resource {
     @Compress
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Returns the components of the X13 processing of the given series", response = XmlTsData.class, responseContainer = "Map")
+    @ApiOperation(value = "Returns the components of the X13 processing of the given series", response = XmlInformationSet.class)
     @ApiResponses(
             value = {
-                @ApiResponse(code = 200, message = "X13 was successfully processed", response = XmlTsData.class, responseContainer = "Map"),
+                @ApiResponse(code = 200, message = "X13 was successfully processed", response = XmlInformationSet.class),
                 @ApiResponse(code = 400, message = "Bad request", response = String.class),
                 @ApiResponse(code = 500, message = "Invalid request", response = String.class)
             }
@@ -70,7 +76,9 @@ public class X13Resource {
             @QueryParam(value = "spec") @DefaultValue("RSA4c") String spec) {
         CompositeResults results = null;
         X13Specification specification;
-        Map<String, XmlTsData> compMap = new HashMap<>();
+
+        InformationSet set = new InformationSet();
+        XmlInformationSet xmlSet = new XmlInformationSet();
 
         if (Strings.isNullOrEmpty(spec)) {
             specification = X13Specification.RSA4;
@@ -95,14 +103,85 @@ public class X13Resource {
                 if (results.contains(c)) {
                     TsData compData = results.getData(c, TsData.class);
                     if (compData != null) {
-                        XmlTsData xml = new XmlTsData();
-                        xml.copy(compData);
-                        compMap.put(c, xml);
+                        set.add(c, compData);
                     }
                 }
             }
+            xmlSet.copy(set);
         }
-
-        return Response.ok().entity(compMap).build();
+        return Response.ok().entity(xmlSet).build();
+    }
+    
+    @GET
+    @Path("{spec}")
+    @Compress
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @ApiOperation(value = "Returns the specification schema from a given specification name", response = XmlX13Specification.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "X13 specification schema was successfully returned", response = XmlX13Specification.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response x13Spec(@PathParam("spec") String spec) {
+        X13Specification specification;
+        if (Strings.isNullOrEmpty(spec)) {
+            throw new IllegalArgumentException(String.format(Messages.UNKNOWN_SPEC, spec));
+        } else {
+            specification = X13Specification.fromString(spec);
+        }
+        
+        XmlX13Specification xml = new XmlX13Specification();
+        xml.copy(specification);
+        
+        return Response.ok().entity(xml).build();
+    }
+    
+    @POST
+    @Path("request")
+    @Compress
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    @ApiOperation(value = "Returns the requested components of the X13 processing of the given series", response = ec.demetra.xml.core.XmlInformationSet.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "X13 was successfully processed", response = ec.demetra.xml.core.XmlInformationSet.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response x13(@ApiParam(name = "request", required = true) XmlX13Request request) {
+        X13XmlProcessor processor = new X13XmlProcessor();
+        ec.demetra.xml.core.XmlInformationSet set = processor.process(request);
+        if (set == null) {
+            throw new IllegalArgumentException("Unable to process the request, please check your inputs.");
+        }
+        
+        return Response.ok().entity(set).build();
+    }
+    
+    @POST
+    @Path("requests")
+    @Compress
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    @ApiOperation(value = "Returns the requested components of the X13 processing of the given series", response = ec.demetra.xml.core.XmlInformationSet.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "X13 was successfully processed", response = ec.demetra.xml.core.XmlInformationSet.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response x13(@ApiParam(name = "request", required = true) XmlX13Requests requests) {
+        X13XmlProcessor processor = new X13XmlProcessor();
+        ec.demetra.xml.core.XmlInformationSet set = processor.process(requests);
+        if (set == null) {
+            throw new IllegalArgumentException("Unable to process the request, please check your inputs.");
+        }
+        
+        return Response.ok().entity(set).build();
     }
 }

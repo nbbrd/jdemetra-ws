@@ -55,5 +55,5 @@ public class SwaggerJaxrsConfig extends HttpServlet {
         } catch (ServletException e) {
             System.out.println(e.getMessage());
         }
-    }
+    }    
 }
