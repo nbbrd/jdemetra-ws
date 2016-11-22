@@ -71,10 +71,10 @@ public class TramoSeatsTest {
         request.setDefaultSpecification("RSAfull");
         request.setSeries(new ec.demetra.xml.core.XmlTs());
         ec.demetra.xml.core.XmlTsData.MARSHALLER.marshal(Data.X, request.getSeries());
-        request.getOutputFilter().add("arima.*");
-        request.getOutputFilter().add("likelihood.*");
-        request.getOutputFilter().add("residuals.*");
-        request.getOutputFilter().add("*_f");
+//        request.getOutputFilter().add("arima.*");
+//        request.getOutputFilter().add("likelihood.*");
+//        request.getOutputFilter().add("residuals.*");
+//        request.getOutputFilter().add("*_f");
 
         Response resp = callWSTramoSeats(request);
         
