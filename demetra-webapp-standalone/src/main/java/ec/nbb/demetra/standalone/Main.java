@@ -17,7 +17,9 @@
 package ec.nbb.demetra.standalone;
 
 import java.io.IOException;
+
 import javax.ws.rs.core.UriBuilder;
+
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -42,7 +44,8 @@ public class Main {
                 .register(io.swagger.jersey.listing.ApiListingResourceJSON.class)
                 .register(io.swagger.jaxrs.listing.SwaggerSerializers.class)
                 .register(ec.nbb.ws.json.JacksonJsonProvider.class)
-                .register(org.glassfish.jersey.jackson.JacksonFeature.class);
+                .register(org.glassfish.jersey.jackson.JacksonFeature.class)
+                .register(ec.nbb.ws.filters.CORSFilter.class);
 
         UriBuilder builder = UriBuilder.fromUri(BASE_URI).port(port);
 
