@@ -21,13 +21,17 @@ import ec.nbb.demetra.model.rest.utils.RestUtils;
 import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
+import java.net.URI;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.message.GZipEncoder;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,13 +39,32 @@ import org.junit.Test;
  *
  * @author Mats Maggi
  */
-public class ForecastingTest {
+public class ForecastingTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new ResourceConfig()
+                .packages("ec.nbb.demetra.rest")
+                .register(ec.nbb.demetra.exception.DemetraExceptionMapper.class)
+                .register(ec.nbb.ws.filters.GZipWriterInterceptor.class)
+                .register(ec.nbb.ws.filters.GZipReaderInterceptor.class)
+                .register(io.swagger.jersey.listing.ApiListingResourceJSON.class)
+                .register(io.swagger.jaxrs.listing.SwaggerSerializers.class)
+                .register(ec.nbb.ws.json.JacksonJsonProvider.class)
+                .register(org.glassfish.jersey.jackson.JacksonFeature.class)
+                .register(ec.nbb.ws.filters.CORSFilter.class);
+    }
+
+    @Override
+    protected URI getBaseUri() {
+        return TestConfig.getURI();
+    }
 
     @Test
     public void forecastingSameDomain() throws JsonProcessingException {
         TsData d = TsData.random(TsFrequency.Monthly);
         XmlTsData ts = new XmlTsData();
-        ts.name = "Blabla";
+        ts.name = "MyTs";
         ts.copy(d);
         int start = RestUtils.fromTsPeriod(d.getStart());
         int end = RestUtils.fromTsPeriod(d.getEnd());
@@ -52,18 +75,18 @@ public class ForecastingTest {
 
         XmlTsData responseTs = resp.readEntity(XmlTsData.class);
         Assert.assertNotNull(responseTs);
-        Assert.assertEquals("Blabla", responseTs.name);
+        Assert.assertEquals("MyTs", responseTs.name);
 
         TsData resultTsData = responseTs.create();
-        Assert.assertEquals(d.getValues().getLength(), resultTsData.getValues().getLength());
-        Assert.assertTrue(d.getDomain().equals(resultTsData.getDomain()));
+        Assert.assertEquals(d.getObsCount(), resultTsData.getObsCount());
+        Assert.assertEquals(d.getDomain(), resultTsData.getDomain());
     }
 
     @Test
     public void backcasting() throws JsonProcessingException {
         TsData d = TsData.random(TsFrequency.Quarterly);
         XmlTsData ts = new XmlTsData();
-        ts.name = "Blabla";
+        ts.name = "MyTs";
         ts.copy(d);
 
         int start = RestUtils.fromTsPeriod(d.getStart().minus(10));
@@ -75,11 +98,11 @@ public class ForecastingTest {
         Assert.assertEquals(200, resp.getStatus());
         XmlTsData responseTs = resp.readEntity(XmlTsData.class);
         Assert.assertNotNull(responseTs);
-        Assert.assertEquals("Blabla", responseTs.name);
+        Assert.assertEquals("MyTs", responseTs.name);
 
         TsData resultTsData = responseTs.create();
         Assert.assertEquals(d.getObsCount() + 10, resultTsData.getObsCount());
-        Assert.assertTrue(d.getEnd().equals(resultTsData.getEnd())); // Backcast so end unchanged
+        Assert.assertEquals(d.getEnd(), resultTsData.getEnd()); // Backcast so end unchanged
     }
 
     private Response callWS(XmlTsData ts, int start, int end) {
@@ -87,7 +110,7 @@ public class ForecastingTest {
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
-        JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
+        JerseyWebTarget jwt = jc.target(getBaseUri());
         Response resp = jwt.path("forecast")
                 .queryParam("start", start)
                 .queryParam("end", end)
