@@ -20,12 +20,18 @@ import ec.nbb.demetra.model.outlier.ShadowOutlier;
 import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
+import java.net.URI;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.message.GZipEncoder;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -33,7 +39,26 @@ import org.junit.Test;
  *
  * @author Mats Maggi
  */
-public class OutlierTest {
+public class OutlierTest extends JerseyTest {
+    
+    @Override
+    protected Application configure() {
+        return new ResourceConfig()
+                .packages("ec.nbb.demetra.rest")
+                .register(ec.nbb.demetra.exception.DemetraExceptionMapper.class)
+                .register(ec.nbb.ws.filters.GZipWriterInterceptor.class)
+                .register(ec.nbb.ws.filters.GZipReaderInterceptor.class)
+                .register(io.swagger.jersey.listing.ApiListingResourceJSON.class)
+                .register(io.swagger.jaxrs.listing.SwaggerSerializers.class)
+                .register(ec.nbb.ws.json.JacksonJsonProvider.class)
+                .register(org.glassfish.jersey.jackson.JacksonFeature.class)
+                .register(ec.nbb.ws.filters.CORSFilter.class);
+    }
+
+    @Override
+    protected URI getBaseUri() {
+        return TestConfig.getURI();
+    }
 
     @Test
     public void outlierNewTest() {
@@ -47,11 +72,13 @@ public class OutlierTest {
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
-        JerseyWebTarget jwt = jc.target("http://localhost:9998/demetra/api");
-        ShadowOutlier[] resp = jwt.path("outlier")
+        JerseyWebTarget jwt = jc.target(getBaseUri());
+        Response resp = jwt.path("outlier")
                 .request(MediaType.APPLICATION_JSON)
                 .acceptEncoding("gzip")
-                .post(Entity.entity(ts, MediaType.APPLICATION_JSON), ShadowOutlier[].class);
-        System.out.println(resp.length);
+                .post(Entity.entity(ts, MediaType.APPLICATION_JSON));
+        Assert.assertEquals(200, resp.getStatus());
+        ShadowOutlier[] outliers = resp.readEntity(ShadowOutlier[].class);
+        Assert.assertEquals(1, outliers.length);
     }
 }

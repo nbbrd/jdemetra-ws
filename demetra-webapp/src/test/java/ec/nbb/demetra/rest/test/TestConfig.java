@@ -16,16 +16,30 @@
  */
 package ec.nbb.demetra.rest.test;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import org.openide.util.Exceptions;
+
 /**
  *
  * @author Mats Maggi
  */
 public class TestConfig {
+
     private static final boolean isLocal = true;
-    
+
     public static final String LOCAL_URL = "http://localhost:9998/demetra/api";
-    
+
     public static String getUrl() {
         return LOCAL_URL;
+    }
+
+    public static URI getURI() {
+        try {
+            return new URI(getUrl());
+        } catch (URISyntaxException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return null;
     }
 }

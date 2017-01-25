@@ -24,27 +24,52 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URI;
 import javax.imageio.ImageIO;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.message.GZipEncoder;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * Test class for the Chart REST resource
+ *
  * @author Mats Maggi
  */
-public class ChartTest {
+public class ChartTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new ResourceConfig()
+                .packages("ec.nbb.demetra.rest")
+                .register(ec.nbb.demetra.exception.DemetraExceptionMapper.class)
+                .register(ec.nbb.ws.filters.GZipWriterInterceptor.class)
+                .register(ec.nbb.ws.filters.GZipReaderInterceptor.class)
+                .register(io.swagger.jersey.listing.ApiListingResourceJSON.class)
+                .register(io.swagger.jaxrs.listing.SwaggerSerializers.class)
+                .register(ec.nbb.ws.json.JacksonJsonProvider.class)
+                .register(org.glassfish.jersey.jackson.JacksonFeature.class)
+                .register(ec.nbb.demetra.filters.ChartBodyWriter.class)
+                .register(ec.nbb.ws.filters.CORSFilter.class);
+    }
+
+    @Override
+    protected URI getBaseUri() {
+        return TestConfig.getURI();
+    }
 
     @Test
     /**
-     * Test of the chart creation by the web service.
-     * Currently, 3 formats are supported :
+     * Test of the chart creation by the web service. Currently, 3 formats are
+     * supported :
      * <li>image/png</li>
      * <li>image/jpeg</li>
      * <li>image/svg+xml</li>
@@ -78,7 +103,8 @@ public class ChartTest {
                 Assert.assertNotNull(image);
                 String subType = resp.getMediaType().getSubtype();
                 try {
-                    ImageIO.write(image, subType, new File(String.format("C:\\Temp\\%s.%s", xmlTsData.name, subType)));
+                    String path = System.getProperty("java.io.tmpdir");
+                    ImageIO.write(image, subType, new File(String.format(path + "%s.%s", xmlTsData.name, subType)));
                 } catch (IOException ex) {
                     Assert.fail(ex.getMessage());
                 }
@@ -91,7 +117,7 @@ public class ChartTest {
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
-        JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
+        JerseyWebTarget jwt = jc.target(getBaseUri());
         Response resp = jwt.path("chart")
                 .queryParam("scheme", "Lollipop")
                 .queryParam("w", 800)

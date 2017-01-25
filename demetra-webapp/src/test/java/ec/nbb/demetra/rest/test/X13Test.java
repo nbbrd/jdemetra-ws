@@ -28,10 +28,8 @@ import ec.demetra.xml.processing.XmlProcessingContext;
 import ec.demetra.xml.regression.XmlRegression;
 import ec.demetra.xml.regression.XmlRegressionItem;
 import ec.demetra.xml.regression.XmlStaticTsVariable;
-import ec.demetra.xml.regression.XmlTsVariable;
 import ec.demetra.xml.regression.XmlTsVariables;
 import ec.demetra.xml.regression.XmlUserVariable;
-import ec.demetra.xml.regression.XmlVariables;
 import ec.demetra.xml.sa.x13.XmlCalendarSpec;
 import ec.demetra.xml.sa.x13.XmlDefaultTradingDaysSpec;
 import ec.demetra.xml.sa.x13.XmlOutliersSpec;
@@ -45,27 +43,48 @@ import ec.demetra.xml.sa.x13.XmlX13Requests;
 import ec.demetra.xml.sa.x13.XmlX13Specification;
 import ec.tstoolkit.modelling.TsVariableDescriptor;
 import ec.tstoolkit.timeseries.calendars.DayEvent;
+import java.net.URI;
 import java.util.List;
 import java.util.Random;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.message.GZipEncoder;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  *
  * @author Mats Maggi
  */
-public class X13Test {
+public class X13Test extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new ResourceConfig()
+                .packages("ec.nbb.demetra.rest")
+                .register(ec.nbb.demetra.exception.DemetraExceptionMapper.class)
+                .register(ec.nbb.ws.filters.GZipWriterInterceptor.class)
+                .register(ec.nbb.ws.filters.GZipReaderInterceptor.class)
+                .register(io.swagger.jersey.listing.ApiListingResourceJSON.class)
+                .register(io.swagger.jaxrs.listing.SwaggerSerializers.class)
+                .register(ec.nbb.ws.json.JacksonJsonProvider.class)
+                .register(org.glassfish.jersey.jackson.JacksonFeature.class)
+                .register(ec.nbb.ws.filters.CORSFilter.class);
+    }
+
+    @Override
+    protected URI getBaseUri() {
+        return TestConfig.getURI();
+    }
 
     @Test
-    @Ignore
     public void x13() {
         XmlX13Request request = new XmlX13Request();
         request.setDefaultSpecification("RSA5c");
@@ -86,7 +105,6 @@ public class X13Test {
     }
 
     @Test
-    @Ignore
     public void x13Custom() {
         XmlX13Request request = new XmlX13Request();
         XmlX13Specification spec = new XmlX13Specification();
@@ -180,7 +198,6 @@ public class X13Test {
     }
 
     @Test
-    @Ignore
     public void x13Requests() {
         XmlX13Requests requests = new XmlX13Requests();
         requests.setFlat(true);
@@ -211,7 +228,7 @@ public class X13Test {
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
-        JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
+        JerseyWebTarget jwt = jc.target(getBaseUri());
         Response resp = jwt.path("x13/request")
                 .request(MediaType.APPLICATION_XML)
                 .acceptEncoding("gzip")
@@ -225,7 +242,7 @@ public class X13Test {
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
-        JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
+        JerseyWebTarget jwt = jc.target(getBaseUri());
         Response resp = jwt.path("x13/requests")
                 .request(MediaType.APPLICATION_XML)
                 .acceptEncoding("gzip")

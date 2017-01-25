@@ -33,8 +33,10 @@ import ec.tstoolkit.timeseries.calendars.NationalCalendarProvider;
 import ec.tstoolkit.timeseries.calendars.SpecialCalendarDay;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
+import java.net.URI;
 import java.util.Map;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -42,6 +44,8 @@ import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.message.GZipEncoder;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -49,7 +53,26 @@ import org.junit.Test;
  *
  * @author Mats Maggi
  */
-public class TramoSeatsTest {
+public class TramoSeatsTest extends JerseyTest {
+
+    @Override
+    protected Application configure() {
+        return new ResourceConfig()
+                .packages("ec.nbb.demetra.rest")
+                .register(ec.nbb.demetra.exception.DemetraExceptionMapper.class)
+                .register(ec.nbb.ws.filters.GZipWriterInterceptor.class)
+                .register(ec.nbb.ws.filters.GZipReaderInterceptor.class)
+                .register(io.swagger.jersey.listing.ApiListingResourceJSON.class)
+                .register(io.swagger.jaxrs.listing.SwaggerSerializers.class)
+                .register(ec.nbb.ws.json.JacksonJsonProvider.class)
+                .register(org.glassfish.jersey.jackson.JacksonFeature.class)
+                .register(ec.nbb.ws.filters.CORSFilter.class);
+    }
+
+    @Override
+    protected URI getBaseUri() {
+        return TestConfig.getURI();
+    }
 
     @Test
     public void tramoseats() throws JsonProcessingException {
@@ -58,32 +81,29 @@ public class TramoSeatsTest {
         xmlTsData.copy(d);
 
         Response resp = callWSTramoSeats(xmlTsData);
-        
+
         Assert.assertEquals(200, resp.getStatus());
-        
-        Map<String, XmlTsData> map = resp.readEntity(new GenericType<Map<String, XmlTsData>>(){});
+
+        Map<String, XmlTsData> map = resp.readEntity(new GenericType<Map<String, XmlTsData>>() {
+        });
         Assert.assertNotNull(map);
     }
-    
+
     @Test
     public void tramoseatsRequest() {
         XmlTramoSeatsRequest request = new XmlTramoSeatsRequest();
         request.setDefaultSpecification("RSAfull");
         request.setSeries(new ec.demetra.xml.core.XmlTs());
         ec.demetra.xml.core.XmlTsData.MARSHALLER.marshal(Data.X, request.getSeries());
-//        request.getOutputFilter().add("arima.*");
-//        request.getOutputFilter().add("likelihood.*");
-//        request.getOutputFilter().add("residuals.*");
-//        request.getOutputFilter().add("*_f");
 
         Response resp = callWSTramoSeats(request);
-        
+
         Assert.assertEquals(200, resp.getStatus());
-        
+
         XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
         Assert.assertNotNull(set);
     }
-    
+
     @Test
     public void tramoseatsRequests() {
         int N = 10;
@@ -96,75 +116,75 @@ public class TramoSeatsTest {
             ec.demetra.xml.core.XmlTsData.MARSHALLER.marshal(Data.P, cur.getSeries());
             requests.getItems().add(cur);
         }
-        requests.setContext(context());        
-        
+        requests.setContext(context());
+
         requests.getOutputFilter().add("arima.*");
         requests.getOutputFilter().add("likelihood.*");
         requests.getOutputFilter().add("residuals.*");
         requests.getOutputFilter().add("*_f");
 
         Response resp = callWSTramoSeats(requests);
-        
+
         Assert.assertEquals(200, resp.getStatus());
-        
+
         XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
         Assert.assertNotNull(set);
     }
-    
+
     public Response callWSTramoSeats(XmlTsData ts) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
-        JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
+        JerseyWebTarget jwt = jc.target(getBaseUri());
         Response resp = jwt.path("tramoseats")
                 .queryParam("spec", "RSA4")
                 .request(MediaType.APPLICATION_JSON)
                 .acceptEncoding("gzip")
                 .post(Entity.entity(ts, MediaType.APPLICATION_JSON));
-        
+
         return resp;
     }
-    
+
     public Response callWSTramoSeats(XmlTramoSeatsRequest request) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
-        JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
+        JerseyWebTarget jwt = jc.target(getBaseUri());
         Response resp = jwt.path("tramoseats/request")
                 .request(MediaType.APPLICATION_XML)
                 .acceptEncoding("gzip")
                 .post(Entity.entity(request, MediaType.APPLICATION_XML));
-        
+
         return resp;
     }
-    
+
     public Response callWSTramoSeats(XmlTramoSeatsRequests requests) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
-        JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
+        JerseyWebTarget jwt = jc.target(getBaseUri());
         Response resp = jwt.path("tramoseats/requests")
                 .request(MediaType.APPLICATION_XML)
                 .acceptEncoding("gzip")
                 .post(Entity.entity(requests, MediaType.APPLICATION_XML));
-        
+
         return resp;
     }
-    
+
     private XmlTramoSeatsSpecification advanced() {
-        TramoSeatsSpecification spec=TramoSeatsSpecification.RSAfull.clone();
+        TramoSeatsSpecification spec = TramoSeatsSpecification.RSAfull.clone();
         spec.getTramoSpecification().getRegression().getCalendar().getTradingDays().setHolidays("Belgium");
-        XmlTramoSeatsSpecification xml=new XmlTramoSeatsSpecification();
+        XmlTramoSeatsSpecification xml = new XmlTramoSeatsSpecification();
         XmlTramoSeatsSpecification.MARSHALLER.marshal(spec, xml);
         return xml;
     }
-    
-    private XmlProcessingContext context(){
-        ProcessingContext context=new ProcessingContext();
-        NationalCalendar calendar=new NationalCalendar();
+
+    private XmlProcessingContext context() {
+        ProcessingContext context = new ProcessingContext();
+        NationalCalendar calendar = new NationalCalendar();
         calendar.add(new FixedDay(20, Month.July));
         calendar.add(new FixedDay(10, Month.October));
         calendar.add(new SpecialCalendarDay(DayEvent.NewYear, 0));
@@ -176,7 +196,7 @@ public class TramoSeatsTest {
         calendar.add(new SpecialCalendarDay(DayEvent.AllSaintsDay, 0));
         calendar.add(new SpecialCalendarDay(DayEvent.Christmas, 0));
         context.getGregorianCalendars().set("Belgium", new NationalCalendarProvider(calendar));
-        XmlProcessingContext xc=new XmlProcessingContext();
+        XmlProcessingContext xc = new XmlProcessingContext();
         XmlProcessingContext.MARSHALLER.marshal(context, xc);
         return xc;
     }
