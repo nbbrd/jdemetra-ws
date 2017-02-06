@@ -51,7 +51,9 @@ import org.junit.Test;
  */
 public class TramoSeatsTest {
 
-    @Test
+    private static final String TRAMOSEATS_REQUEST_PATH = "tramoseats/request";
+
+	@Test
     public void tramoseats() throws JsonProcessingException {
         TsData d = TsData.random(TsFrequency.Monthly);
         XmlTsData xmlTsData = new XmlTsData();
@@ -66,7 +68,7 @@ public class TramoSeatsTest {
     }
     
     @Test
-    public void tramoseatsRequest() {
+    public void tramoseatsRequest() throws Exception {
         XmlTramoSeatsRequest request = new XmlTramoSeatsRequest();
         request.setDefaultSpecification("RSAfull");
         request.setSeries(new ec.demetra.xml.core.XmlTs());
@@ -76,12 +78,18 @@ public class TramoSeatsTest {
 //        request.getOutputFilter().add("residuals.*");
 //        request.getOutputFilter().add("*_f");
 
-        Response resp = callWSTramoSeats(request);
+        Response resp = callWSTramoSeats(request);        
+        Response respJSON = callWSTramoSeatsJSON(request);
         
         Assert.assertEquals(200, resp.getStatus());
+        Assert.assertEquals(200, respJSON.getStatus());
         
         XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
+        XmlInformationSet setJSON = respJSON.readEntity(XmlInformationSet.class);
+        
         Assert.assertNotNull(set);
+        Assert.assertNotNull(setJSON);
+        Assert.assertEquals(set.item.length, setJSON.item.length);
     }
     
     @Test
@@ -132,7 +140,7 @@ public class TramoSeatsTest {
         JerseyClient jc = jcb.build();
 
         JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
-        Response resp = jwt.path("tramoseats/request")
+        Response resp = jwt.path(TRAMOSEATS_REQUEST_PATH)
                 .request(MediaType.APPLICATION_XML)
                 .acceptEncoding("gzip")
                 .post(Entity.entity(request, MediaType.APPLICATION_XML));
@@ -150,6 +158,20 @@ public class TramoSeatsTest {
                 .request(MediaType.APPLICATION_XML)
                 .acceptEncoding("gzip")
                 .post(Entity.entity(requests, MediaType.APPLICATION_XML));
+        
+        return resp;
+    }    
+    // RT 26012017
+    public Response callWSTramoSeatsJSON(XmlTramoSeatsRequest request) {
+        JerseyClientBuilder jcb = new JerseyClientBuilder();
+        jcb.register(GZipEncoder.class);
+        JerseyClient jc = jcb.build();
+
+        JerseyWebTarget jwt = jc.target(TestConfig.getUrl());
+        Response resp = jwt.path(TRAMOSEATS_REQUEST_PATH)
+                .request(MediaType.APPLICATION_JSON)
+                .acceptEncoding("gzip")
+                .post(Entity.entity(request, MediaType.APPLICATION_JSON));
         
         return resp;
     }

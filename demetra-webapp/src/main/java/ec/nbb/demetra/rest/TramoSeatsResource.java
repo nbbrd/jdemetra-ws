@@ -136,8 +136,8 @@ public class TramoSeatsResource {
     @POST
     @Compress
     @Path("/request")
-    @Consumes(MediaType.APPLICATION_XML)
-    @Produces(MediaType.APPLICATION_XML)
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @ApiOperation(value = "Returns the requested components of the TramoSeats processing of the given series", response = XmlInformationSet.class)
     @ApiResponses(
             value = {
