@@ -1,4 +1,4 @@
-#JDemetra+ Web Service
+# JDemetra+ Web Service
 
 JDemetra-ws is a free and open-source software (FOSS) developed under the [EUPL licence](http://ec.europa.eu/idabc/eupl).
 
