@@ -1,4 +1,4 @@
-#Seasonal adjustment
+# Seasonal adjustment
 
 ## Overview
 

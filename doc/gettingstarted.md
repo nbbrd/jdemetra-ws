@@ -1,13 +1,13 @@
-##Getting started and installation
+## Getting started and installation
 
-##Client-side
+## Client-side
 
 * Register `GZipEncoder.class` to deserialize response
 * Register `GZipDecoder.class` to serialize the request (post the GZIPInputStream as entity)
 * Register `GZIPContentEncodingFilter.class` to add the header “Content-Encoding” to the re
 quest (otherwise the call overrides the explicit given header)
 
-###Call Example
+### Call Example
 
 	JerseyClientBuilder jcb = new JerseyClientBuilder();
 	jcb.register(GZipEncoder.class);
@@ -19,14 +19,14 @@ quest (otherwise the call overrides the explicit given header)
 	    .acceptEncoding("gzip")
 	    .post(Entity.entity(ts, MediaType.APPLICATION_JSON));
 
-##Server-side
+## Server-side
 _NB : The standalone project can be built to produce a jar that starts the server (so, an application server like Glassfish is not needed but the swagger documentation can't be accessed at the moment)_
 
-###Exception Mapper
+### Exception Mapper
 
 Create a class implementing `ExceptionMapper<T>` and annotate it with `@Provider`
 
-####Example
+#### Example
 
     @Provider
     public class DemetraExceptionMapper implements ExceptionMapper<Throwable> {
@@ -39,7 +39,7 @@ Create a class implementing `ExceptionMapper<T>` and annotate it with `@Provider
         }
     }
 
-##Application Config
+## Application Config
 
 To avoid using a web.xml file, a class can take the role of configuring and registering providers/servlets/resources. Create a class extending Application and annotate it with `@ApplicationPath(“path-name”)`. Path name corresponds to the api path on which the configuration has to be applied.
 
@@ -51,11 +51,11 @@ Using swagger, you need to add these resources :
 
 You’ll also need to register the **ExceptionMapper**, all the resources (classes containing web service methods), and if used the **GZipWriterInterceptor** and/or **GZipReaderInterceptor**.
 
-##GZip Compression
+## GZip Compression
 
 Filters catching the request or response and wraps the output/input stream in a corresponding GZip stream to enable automatic compression/decompression.
 
-###GZipReaderInterceptor
+### GZipReaderInterceptor
 
     @Provider
     public class GZipReaderInterceptor implements ReaderInterceptor {
@@ -71,7 +71,7 @@ Filters catching the request or response and wraps the output/input stream in a 
 	    }
     }
 
-###GZipWriterInterceptor
+### GZipWriterInterceptor
 
     @Provider
     @Compress
@@ -89,7 +89,7 @@ Filters catching the request or response and wraps the output/input stream in a 
     }
 
 
-###@Compress annotation
+### @Compress annotation
 
 Enables the compression of a response only on web service methods annotated with `@Compress`
 
@@ -97,11 +97,11 @@ Enables the compression of a response only on web service methods annotated with
     @Retention(RetentionPolicy.RUNTIME)
     public @interface Compress { }
 
-##Cors Filter
+## Cors Filter
 
 A filter is needed to allow request from cross domains (browser, code, …)
 
-###Example
+### Example
 
     @WebFilter(filterName = "HTML5CorsFilter", urlPatterns = {"/api/*"})
     public class HTML5CorsFilter implements javax.servlet.Filter {
@@ -122,9 +122,9 @@ A filter is needed to allow request from cross domains (browser, code, …)
         public void destroy() { }
     }
 
-##Glassfish configuration
+## Glassfish configuration
 
-###SSL Security
+### SSL Security
 
 Activate the SSL3 under `Configurations > server-config > Network Listeners > http-listener-2 > SSL`
 
@@ -133,7 +133,7 @@ To allow SSL enabling, you have to add 2 JVM options for the server-config :
 - `-Djavax.net.ssl.trustStorePassword=master-password`
 - `-Djavax.net.ssl.keyStorePassword=master-password`
 
-###Certificate
+### Certificate
 
 Glassfish creates its own keystore and cacerts when creating the domain. They can be found under :
  `<Glassfish Folder>\glassfish\domains\domain1\config`.
@@ -164,7 +164,7 @@ To list certificates informations contained in a keystore :
 
 (Add `-alias <alias>` if you only want to show one specified certificate)
 
-###Replacement of old libraries
+### Replacement of old libraries
 
 Out of the box, Glassfish 4.1 contains old versions of Jackson libraries which create some conflicts. I replaced them with the version 2.4.5 (or newest if available). 
 These libraries can be found under `<Glassfish Folder>\glassfish\modules` :
@@ -176,7 +176,7 @@ These libraries can be found under `<Glassfish Folder>\glassfish\modules` :
 * jackson-core.jar
 * jackson-module-jaxb-annotations.jar
 
-##Swagger Configuration servlet
+## Swagger Configuration servlet
 
 This servlet is used to generate some documentation over the API and to configure the Swagger UI that will parse the API to generate the documentation.
 
