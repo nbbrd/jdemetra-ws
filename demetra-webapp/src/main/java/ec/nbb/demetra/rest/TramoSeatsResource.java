@@ -54,7 +54,7 @@ import javax.ws.rs.core.Response;
 @Path("/tramoseats")
 @Api(value = "/tramoseats")
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-@Produces(MediaType.APPLICATION_JSON)
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class TramoSeatsResource {
 
     private final String[] components = {"sa", "t", "s", "i", "y_f"};

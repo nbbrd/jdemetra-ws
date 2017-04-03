@@ -25,16 +25,16 @@ import ec.nbb.ws.annotations.Compress;
 import ec.satoolkit.algorithm.implementation.X13ProcessingFactory;
 import ec.satoolkit.x13.X13Specification;
 import ec.tss.xml.XmlTsData;
-import ec.tss.xml.information.XmlInformationSet;
 import ec.tss.xml.x13.XmlX13Specification;
 import ec.tstoolkit.algorithm.CompositeResults;
-import ec.tstoolkit.information.InformationSet;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -62,10 +62,10 @@ public class X13Resource {
     @Compress
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Returns the components of the X13 processing of the given series", response = XmlInformationSet.class)
+    @ApiOperation(value = "Returns the components of the X13 processing of the given series", response = XmlTsData.class, responseContainer = "Map")
     @ApiResponses(
             value = {
-                @ApiResponse(code = 200, message = "X13 was successfully processed", response = XmlInformationSet.class),
+                @ApiResponse(code = 200, message = "X13 was successfully processed", response = XmlTsData.class, responseContainer = "Map"),
                 @ApiResponse(code = 400, message = "Bad request", response = String.class),
                 @ApiResponse(code = 500, message = "Invalid request", response = String.class)
             }
@@ -76,9 +76,7 @@ public class X13Resource {
             @QueryParam(value = "spec") @DefaultValue("RSA4c") String spec) {
         CompositeResults results = null;
         X13Specification specification;
-
-        InformationSet set = new InformationSet();
-        XmlInformationSet xmlSet = new XmlInformationSet();
+        Map<String, XmlTsData> compMap = new HashMap<>();
 
         if (Strings.isNullOrEmpty(spec)) {
             specification = X13Specification.RSA4;
@@ -102,14 +100,13 @@ public class X13Resource {
             for (String c : components) {
                 if (results.contains(c)) {
                     TsData compData = results.getData(c, TsData.class);
-                    if (compData != null) {
-                        set.add(c, compData);
-                    }
+                    XmlTsData xml = new XmlTsData();
+                    xml.copy(compData);
+                    compMap.put(c, xml);
                 }
             }
-            xmlSet.copy(set);
         }
-        return Response.ok().entity(xmlSet).build();
+        return Response.ok().entity(compMap).build();
     }
     
     @GET
