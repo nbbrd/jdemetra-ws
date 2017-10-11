@@ -112,7 +112,7 @@ public class ChartTest extends JerseyTest {
         }
     }
 
-    public Response callWS(XmlTsData ts, String format) {
+    private Response callWS(XmlTsData ts, String format) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();

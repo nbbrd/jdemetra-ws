@@ -70,24 +70,42 @@ public class CheckLastTest extends JerseyTest {
         resp = callWS(xml, MediaType.APPLICATION_XML);
         Assert.assertEquals(200, resp.getStatus());
         
+        resp = callWS(xml, MediaType.APPLICATION_JSON);
+        Assert.assertEquals(200, resp.getStatus());
+        
+        resp = callWS(xml, MediaType.APPLICATION_XML);
+        Assert.assertEquals(200, resp.getStatus());
+        
         resp = callWS(xml, MediaType.APPLICATION_JSON, 1, "tramoseats", "RSA4");
+        Assert.assertEquals(200, resp.getStatus());
+        
+        resp = callWS(xml, MediaType.APPLICATION_XML, 1, "tramoseats", "RSA4");
         Assert.assertEquals(200, resp.getStatus());
         
         resp = callWS(xml, MediaType.APPLICATION_JSON, 1, "tramoseats", "MY_SPEC");
         Assert.assertEquals(500, resp.getStatus());
         
+        resp = callWS(xml, MediaType.APPLICATION_XML, 1, "tramoseats", "MY_SPEC");
+        Assert.assertEquals(500, resp.getStatus());
+        
         resp = callWS(xml, MediaType.APPLICATION_JSON, 1, "x13", "RG3");
+        Assert.assertEquals(200, resp.getStatus());
+        
+        resp = callWS(xml, MediaType.APPLICATION_XML, 1, "x13", "RG3");
         Assert.assertEquals(200, resp.getStatus());
         
         resp = callWS(xml, MediaType.APPLICATION_JSON, 1, "tramoseats", "RG3");
         Assert.assertEquals(500, resp.getStatus());
+        
+        resp = callWS(xml, MediaType.APPLICATION_XML, 1, "tramoseats", "RG3");
+        Assert.assertEquals(500, resp.getStatus());
     }
     
-    public Response callWS(XmlTsData ts, String type) {
+    private Response callWS(XmlTsData ts, String type) {
         return callWS(ts, type, 1, "tramoseats", "TRfull");
     }
 
-    public Response callWS(XmlTsData ts, String type, int nbLast, String algo, String spec) {
+    private Response callWS(XmlTsData ts, String type, int nbLast, String algo, String spec) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();

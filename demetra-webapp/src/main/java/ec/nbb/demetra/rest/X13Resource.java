@@ -21,9 +21,16 @@ import ec.demetra.xml.sa.x13.X13XmlProcessor;
 import ec.demetra.xml.sa.x13.XmlX13Request;
 import ec.demetra.xml.sa.x13.XmlX13Requests;
 import ec.nbb.demetra.Messages;
+import ec.nbb.demetra.json.excel.ExcelSeries;
+import ec.nbb.demetra.model.rest.utils.RestUtils;
 import ec.nbb.ws.annotations.Compress;
 import ec.satoolkit.algorithm.implementation.X13ProcessingFactory;
 import ec.satoolkit.x13.X13Specification;
+import ec.tss.TsCollection;
+import ec.tss.TsCollectionInformation;
+import ec.tss.TsFactory;
+import ec.tss.TsInformation;
+import ec.tss.TsInformationType;
 import ec.tss.xml.XmlTsData;
 import ec.tss.xml.x13.XmlX13Specification;
 import ec.tstoolkit.algorithm.CompositeResults;
@@ -33,7 +40,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -53,7 +62,7 @@ import javax.ws.rs.core.Response;
 @Path("/x13")
 @Api(value = "/x13")
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-@Produces(MediaType.APPLICATION_JSON)
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public class X13Resource {
 
     private final String[] components = {"sa", "t", "s", "i", "y_f"};
@@ -61,7 +70,7 @@ public class X13Resource {
     @POST
     @Compress
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @ApiOperation(value = "Returns the components of the X13 processing of the given series", response = XmlTsData.class, responseContainer = "Map")
     @ApiResponses(
             value = {
@@ -139,8 +148,8 @@ public class X13Resource {
     @POST
     @Path("request")
     @Compress
-    @Consumes(MediaType.APPLICATION_XML)
-    @Produces(MediaType.APPLICATION_XML)
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @ApiOperation(value = "Returns the requested components of the X13 processing of the given series", response = ec.demetra.xml.core.XmlInformationSet.class)
     @ApiResponses(
             value = {
@@ -162,8 +171,8 @@ public class X13Resource {
     @POST
     @Path("requests")
     @Compress
-    @Consumes(MediaType.APPLICATION_XML)
-    @Produces(MediaType.APPLICATION_XML)
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @ApiOperation(value = "Returns the requested components of the X13 processing of the given series", response = ec.demetra.xml.core.XmlInformationSet.class)
     @ApiResponses(
             value = {
@@ -180,5 +189,67 @@ public class X13Resource {
         }
         
         return Response.ok().entity(set).build();
+    }
+    
+    @POST
+    @Compress
+    @Path("excel")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Returns the components of the X13 processing of the given series", response = ExcelSeries.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "X13 was successfully processed", response = ExcelSeries.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response x13Excel(@ApiParam(name = "series", required = true) ExcelSeries series,
+            @ApiParam(name = "spec") @QueryParam(value = "spec") String spec,
+            @ApiParam(name = "components") @QueryParam(value = "components") List<String> components) {
+        X13Specification specification;
+        if (Strings.isNullOrEmpty(spec)) {
+            specification = X13Specification.RSA5;
+        } else {
+            specification = X13Specification.fromString(spec);
+        }
+
+        TsCollectionInformation infoColl = RestUtils.readExcelSeries(series);
+        CompositeResults[] results = new CompositeResults[infoColl.items.size()];
+        if (infoColl == null) {
+            throw new IllegalArgumentException(Messages.TS_NULL);
+        } else {
+            int i = 0;
+            for (TsInformation info : infoColl.items) {
+                results[i] = X13ProcessingFactory.process(info.data, specification);
+                i++;
+            }
+        }
+
+        TsCollection coll = TsFactory.instance.createTsCollection("results");
+        
+        if (results == null) {
+            throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
+        } else {
+            if (components == null || components.isEmpty()) {
+                components = Arrays.asList(this.components);
+            }
+            
+            int i = 0;
+            for (CompositeResults result : results) {
+                for (String c : components) {
+                    if (result != null && result.contains(c)) {
+                        TsData compData = result.getData(c, TsData.class);                        
+                        coll.add(TsFactory.instance.createTs(c + " ("+ i++ + ")", null, compData));
+                    } else {
+                        coll.add(TsFactory.instance.createTs(c + " ("+ i++ + ")"));
+                    }
+                }
+            }
+        }
+        
+        // Format results
+        ExcelSeries response = RestUtils.toExcelSeries(new TsCollectionInformation(coll, TsInformationType.Data));
+        return Response.ok().entity(response).build();
     }
 }

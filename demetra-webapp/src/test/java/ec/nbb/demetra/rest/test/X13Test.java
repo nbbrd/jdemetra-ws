@@ -85,7 +85,7 @@ public class X13Test extends JerseyTest {
     }
 
     @Test
-    public void x13() {
+    public void x13XML() {
         XmlX13Request request = new XmlX13Request();
         request.setDefaultSpecification("RSA5c");
         XmlTs s = new XmlTs();
@@ -96,16 +96,42 @@ public class X13Test extends JerseyTest {
         request.getOutputFilter().add("residuals.*");
         request.getOutputFilter().add("*_f");
 
-        Response resp = callWSX13(request);
+        Response resp = callWSX13(request, MediaType.APPLICATION_XML, MediaType.APPLICATION_XML);
 
-        Assert.assertEquals(200, resp.getStatus());
-
-        XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
-        Assert.assertNotNull(set);
+        if (resp.getStatus() != 200) {
+            Assert.fail(resp.readEntity(String.class));
+        } else {
+            Assert.assertEquals(200, resp.getStatus());
+            XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
+            Assert.assertNotNull(set);
+        }
     }
 
     @Test
-    public void x13Custom() {
+    public void x13JSON() {
+        XmlX13Request request = new XmlX13Request();
+        request.setDefaultSpecification("RSA5c");
+        XmlTs s = new XmlTs();
+        XmlTsData.MARSHALLER.marshal(Data.P, s);
+        request.setSeries(s);
+        request.getOutputFilter().add("arima.*");
+        request.getOutputFilter().add("likelihood.*");
+        request.getOutputFilter().add("residuals.*");
+        request.getOutputFilter().add("*_f");
+
+        Response resp = callWSX13(request, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+
+        if (resp.getStatus() != 200) {
+            Assert.fail(resp.readEntity(String.class));
+        } else {
+            Assert.assertEquals(200, resp.getStatus());
+            XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
+            Assert.assertNotNull(set);
+        }
+    }
+
+    @Test
+    public void x13CustomXML() {
         XmlX13Request request = new XmlX13Request();
         XmlX13Specification spec = new XmlX13Specification();
         XmlRegArimaSpecification preprocessing = new XmlRegArimaSpecification();
@@ -129,16 +155,55 @@ public class X13Test extends JerseyTest {
         request.getOutputFilter().add("residuals.*");
         request.getOutputFilter().add("*_f");
 
-        Response resp = callWSX13(request);
+        Response resp = callWSX13(request, MediaType.APPLICATION_XML, MediaType.APPLICATION_XML);
 
-        Assert.assertEquals(200, resp.getStatus());
-
-        XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
-        Assert.assertNotNull(set);
+        if (resp.getStatus() != 200) {
+            Assert.fail(resp.readEntity(String.class));
+        } else {
+            Assert.assertEquals(200, resp.getStatus());
+            XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
+            Assert.assertNotNull(set);
+        }
     }
 
     @Test
-    public void x13CustomWithContext() {
+    public void x13CustomJSON() {
+        XmlX13Request request = new XmlX13Request();
+        XmlX13Specification spec = new XmlX13Specification();
+        XmlRegArimaSpecification preprocessing = new XmlRegArimaSpecification();
+        XmlTransformationSpec transformation = new XmlTransformationSpec();
+        transformation.setLog(new XmlEmptyElement());
+        preprocessing.setTransformation(transformation);
+        XmlOutliersSpec outliers = new XmlOutliersSpec();
+        outliers.setCriticalValue(3.5);
+        outliers.getTypes().add("AO");
+        preprocessing.setOutliers(outliers);
+        XmlX11Spec decomposition = new XmlX11Spec();
+        decomposition.setTrendMA(23);
+        spec.setPreprocessing(preprocessing);
+        spec.setDecomposition(decomposition);
+        request.setSpecification(spec);
+        XmlTs s = new XmlTs();
+        XmlTsData.MARSHALLER.marshal(Data.P, s);
+        request.setSeries(s);
+        request.getOutputFilter().add("arima.*");
+        request.getOutputFilter().add("likelihood.*");
+        request.getOutputFilter().add("residuals.*");
+        request.getOutputFilter().add("*_f");
+
+        Response resp = callWSX13(request, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+
+        if (resp.getStatus() != 200) {
+            Assert.fail(resp.readEntity(String.class));
+        } else {
+            Assert.assertEquals(200, resp.getStatus());
+            XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
+            Assert.assertNotNull(set);
+        }
+    }
+
+    @Test
+    public void x13CustomWithContextXML() {
         XmlX13Request request = new XmlX13Request();
         XmlX13Specification spec = new XmlX13Specification();
         // Preprocessing
@@ -189,16 +254,81 @@ public class X13Test extends JerseyTest {
         request.getOutputFilter().add("*_f");
         request.getOutputFilter().add("regression.*");
 
-        Response resp = callWSX13(request);
+        Response resp = callWSX13(request, MediaType.APPLICATION_XML, MediaType.APPLICATION_XML);
 
-        Assert.assertEquals(200, resp.getStatus());
-
-        XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
-        Assert.assertNotNull(set);
+        if (resp.getStatus() != 200) {
+            Assert.fail(resp.readEntity(String.class));
+        } else {
+            Assert.assertEquals(200, resp.getStatus());
+            XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
+            Assert.assertNotNull(set);
+        }
     }
 
     @Test
-    public void x13Requests() {
+    public void x13CustomWithContextJSON() {
+        XmlX13Request request = new XmlX13Request();
+        XmlX13Specification spec = new XmlX13Specification();
+        // Preprocessing
+        XmlRegArimaSpecification preprocessing = new XmlRegArimaSpecification();
+        // transform
+        XmlTransformationSpec transformation = new XmlTransformationSpec();
+        transformation.setLog(new XmlEmptyElement());
+        preprocessing.setTransformation(transformation);
+        // calendar
+        XmlCalendarSpec calendar = new XmlCalendarSpec();
+        XmlTradingDaysSpec tradingDays = new XmlTradingDaysSpec();
+        XmlDefaultTradingDaysSpec deftd = new XmlDefaultTradingDaysSpec();
+        deftd.setCalendar("test");
+        tradingDays.setDefault(deftd);
+        calendar.setTradingDays(tradingDays);
+        preprocessing.setCalendar(calendar);
+        // outlier
+        XmlOutliersSpec outliers = new XmlOutliersSpec();
+        outliers.setCriticalValue(3.5);
+        outliers.getTypes().add("AO");
+        preprocessing.setOutliers(outliers);
+        // user-defined regressors
+        XmlRegressionSpec regression = new XmlRegressionSpec();
+        XmlRegression variables = new XmlRegression();
+        List<XmlRegressionItem> items = variables.getItems();
+        XmlRegressionItem xvar = new XmlRegressionItem();
+        XmlUserVariable xuser = new XmlUserVariable();
+        xuser.setVariable("vars.reg1");
+        xuser.setEffect(TsVariableDescriptor.UserComponentType.Irregular);
+        xvar.setVariable(xuser);
+        items.add(xvar);
+        regression.setVariables(variables);
+        preprocessing.setRegression(regression);
+        // x11
+        XmlX11Spec decomposition = new XmlX11Spec();
+        decomposition.setTrendMA(23);
+        spec.setPreprocessing(preprocessing);
+        spec.setDecomposition(decomposition);
+        request.setSpecification(spec);
+        XmlProcessingContext context = generateContext();
+        request.setContext(context);
+        XmlTs s = new XmlTs();
+        XmlTsData.MARSHALLER.marshal(Data.P, s);
+        request.setSeries(s);
+        request.getOutputFilter().add("arima.*");
+        request.getOutputFilter().add("likelihood.*");
+        request.getOutputFilter().add("residuals.*");
+        request.getOutputFilter().add("*_f");
+        request.getOutputFilter().add("regression.*");
+
+        Response resp = callWSX13(request, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+        if (resp.getStatus() != 200) {
+            Assert.fail(resp.readEntity(String.class));
+        } else {
+            Assert.assertEquals(200, resp.getStatus());
+            XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
+            Assert.assertNotNull(set);
+        }
+    }
+
+    @Test
+    public void x13RequestsXML() {
         XmlX13Requests requests = new XmlX13Requests();
         requests.setFlat(true);
         for (int i = 0; i < 5; ++i) {
@@ -215,43 +345,75 @@ public class X13Test extends JerseyTest {
         requests.getOutputFilter().add("residuals.*");
         requests.getOutputFilter().add("*_f");
 
-        Response resp = callWSX13(requests);
+        Response resp = callWSX13(requests, MediaType.APPLICATION_XML, MediaType.APPLICATION_XML);
 
-        Assert.assertEquals(200, resp.getStatus());
-
-        XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
-        Assert.assertNotNull(set);
+        if (resp.getStatus() != 200) {
+            Assert.fail(resp.readEntity(String.class));
+        } else {
+            Assert.assertEquals(200, resp.getStatus());
+            XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
+            Assert.assertNotNull(set);
+        }
     }
 
-    public Response callWSX13(XmlX13Request request) {
+    @Test
+    public void x13RequestsJSON() {
+        XmlX13Requests requests = new XmlX13Requests();
+        requests.setFlat(true);
+        for (int i = 0; i < 5; ++i) {
+            XmlX13Request cur = new XmlX13Request();
+            cur.setDefaultSpecification("RSA5c");
+            XmlTs s = new XmlTs();
+            XmlTsData.MARSHALLER.marshal(Data.P, s);
+            cur.setSeries(s);
+            requests.getItems().add(cur);
+        }
+
+        requests.getOutputFilter().add("arima.*");
+        requests.getOutputFilter().add("likelihood.*");
+        requests.getOutputFilter().add("residuals.*");
+        requests.getOutputFilter().add("*_f");
+
+        Response resp = callWSX13(requests, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+
+        if (resp.getStatus() != 200) {
+            Assert.fail(resp.readEntity(String.class));
+        } else {
+            Assert.assertEquals(200, resp.getStatus());
+            XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
+            Assert.assertNotNull(set);
+        }
+    }
+
+    private Response callWSX13(XmlX13Request request, String inputType, String outputType) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
         JerseyWebTarget jwt = jc.target(getBaseUri());
         Response resp = jwt.path("x13/request")
-                .request(MediaType.APPLICATION_XML)
+                .request(outputType)
                 .acceptEncoding("gzip")
-                .post(Entity.entity(request, MediaType.APPLICATION_XML));
+                .post(Entity.entity(request, inputType));
 
         return resp;
     }
 
-    public Response callWSX13(XmlX13Requests requests) {
+    private Response callWSX13(XmlX13Requests requests, String inputType, String outputType) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
         JerseyWebTarget jwt = jc.target(getBaseUri());
         Response resp = jwt.path("x13/requests")
-                .request(MediaType.APPLICATION_XML)
+                .request(outputType)
                 .acceptEncoding("gzip")
-                .post(Entity.entity(requests, MediaType.APPLICATION_XML));
+                .post(Entity.entity(requests, inputType));
 
         return resp;
     }
 
-    static XmlNationalCalendar generateCalendar() {
+    private static XmlNationalCalendar generateCalendar() {
         XmlNationalCalendar nc = new XmlNationalCalendar();
         nc.setName("test");
         XmlSpecialCalendarDay christmas = new XmlSpecialCalendarDay();
@@ -267,7 +429,7 @@ public class X13Test extends JerseyTest {
         return nc;
     }
 
-    static XmlProcessingContext generateContext() {
+    private static XmlProcessingContext generateContext() {
         XmlProcessingContext context = new XmlProcessingContext();
         XmlCalendars cal = new XmlCalendars();
         cal.getCalendars().add(generateCalendar());

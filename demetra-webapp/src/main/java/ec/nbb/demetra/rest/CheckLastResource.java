@@ -17,8 +17,12 @@
 package ec.nbb.demetra.rest;
 
 import ec.nbb.demetra.Messages;
+import ec.nbb.demetra.json.excel.CheckLastResult;
+import ec.nbb.demetra.json.excel.ExcelSeries;
+import ec.nbb.demetra.model.rest.utils.RestUtils;
 import ec.nbb.demetra.model.terror.TerrorResult;
 import ec.nbb.ws.annotations.Compress;
+import ec.tss.TsCollectionInformation;
 import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.modelling.arima.CheckLast;
 import ec.tstoolkit.modelling.arima.IPreprocessor;
@@ -171,5 +175,61 @@ public class CheckLastResource {
             }
         }
         return Response.ok().entity(results).build();
+    }
+
+    @POST
+    @Path("/excel")
+    @Compress
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Process a check last on a given list of series", notes = "Creates a check last processing.", response = CheckLastResult.class, responseContainer = "List")
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "Successful processing of check last", response = CheckLastResult.class, responseContainer = "List"),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response checkLastExcel(
+            @ApiParam(name = "series", required = true) ExcelSeries excelSeries,
+            @ApiParam(name = "nbLast", required = true) @QueryParam("nbLast") @DefaultValue("1") int nbLast,
+            @ApiParam(name = "algorithm") @QueryParam("algorithm") @DefaultValue("tramoseats") String algorithm,
+            @ApiParam(name = "spec", defaultValue = "TRfull") @QueryParam("spec") @DefaultValue("TRfull") String spec) {
+        IPreprocessor p = null;
+
+        if (nbLast <= 0) {
+            throw new IllegalArgumentException(Messages.POSITIVE_NB_LAST);
+        }
+
+        TsCollectionInformation infoColl = RestUtils.readExcelSeries(excelSeries);
+        spec = mapSpec(algorithm, spec);
+
+        switch (algorithm.toLowerCase()) {
+            case "tramoseats":
+                p = TramoSpecification.defaultPreprocessor(TramoSpecification.Default.valueOfIgnoreCase(spec));
+                break;
+            case "x13":
+                p = RegArimaSpecification.defaultPreprocessor(RegArimaSpecification.Default.valueOf(spec));
+                break;
+            default:
+                throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, algorithm));
+        }
+
+        List<CheckLastResult> response = new ArrayList<>();
+        CheckLast cl = new CheckLast(p);
+        cl.setBackCount(nbLast);
+
+        infoColl.items.stream().forEach((t) -> {
+            try {
+                if (cl.check(t.data)) {
+                    response.add(new CheckLastResult(t.name, cl.getValues(), cl.getForecastsValues(), cl.getScores()));
+                } else {
+                    response.add(null);
+                }
+            } catch (Exception ex) {
+                response.add(null);
+            }
+        });
+        return Response.ok().entity(response).build();
     }
 }

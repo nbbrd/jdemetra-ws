@@ -19,12 +19,17 @@ package ec.nbb.ws.filters;
 import ec.nbb.ws.annotations.Compress;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPOutputStream;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.WriterInterceptor;
 import javax.ws.rs.ext.WriterInterceptorContext;
+import jersey.repackaged.com.google.common.base.MoreObjects;
 
 /**
  * GZIP Interceptor that wraps the response in a gzip output stream. The
@@ -37,13 +42,25 @@ import javax.ws.rs.ext.WriterInterceptorContext;
 @Compress
 public class GZipWriterInterceptor implements WriterInterceptor {
 
-    @Override
-    public void aroundWriteTo(WriterInterceptorContext context)
-            throws IOException, WebApplicationException {
-        context.getHeaders().putSingle(HttpHeaders.CONTENT_ENCODING, "gzip");
+    @Context
+    private HttpHeaders httpHeaders;
 
-        final OutputStream outputStream = context.getOutputStream();
-        context.setOutputStream(new GZIPOutputStream(outputStream));
+    @Override
+    public void aroundWriteTo(WriterInterceptorContext context) throws IOException, WebApplicationException {
+        MultivaluedMap<String, String> requestHeaders = httpHeaders.getRequestHeaders();
+        List<String> acceptEncoding = MoreObjects.firstNonNull(requestHeaders.get(HttpHeaders.ACCEPT_ENCODING), new ArrayList<String>());
+
+        // Compress if client accepts gzip encoding
+        for (String s : acceptEncoding) {
+            if (s.contains("gzip")) {
+                context.getHeaders().putSingle(HttpHeaders.CONTENT_ENCODING, "gzip");
+
+                final OutputStream outputStream = context.getOutputStream();
+                context.setOutputStream(new GZIPOutputStream(outputStream));
+
+                break;
+            }
+        }
         context.proceed();
     }
 }

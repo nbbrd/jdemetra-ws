@@ -16,8 +16,13 @@
  */
 package ec.nbb.ws.json;
 
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import io.swagger.util.Json;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -27,9 +32,17 @@ import javax.ws.rs.ext.Provider;
 @Produces({MediaType.APPLICATION_JSON})
 public class JacksonJsonProvider extends JacksonJaxbJsonProvider {
 
-    private static ObjectMapper commonMapper = Json.mapper();
+    private final static ObjectMapper COMMON_MAPPER = Json.mapper();
+    
+    static {
+        AnnotationIntrospector aiJaxb = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
+        AnnotationIntrospector aiJackson = new JacksonAnnotationIntrospector();
+        // first Jaxb, second Jackson annotations
+        COMMON_MAPPER.setAnnotationIntrospector(AnnotationIntrospector.pair(aiJaxb, aiJackson));
+        COMMON_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
+    }
 
     public JacksonJsonProvider() {
-        super.setMapper(commonMapper);
+        super.setMapper(COMMON_MAPPER);
     }
 }

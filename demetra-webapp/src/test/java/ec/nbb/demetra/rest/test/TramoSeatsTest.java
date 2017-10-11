@@ -48,6 +48,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.Test;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -90,22 +91,33 @@ public class TramoSeatsTest extends JerseyTest {
     }
 
     @Test
-    public void tramoseatsRequest() {
+    public void tramoseatsRequestXML() {
         XmlTramoSeatsRequest request = new XmlTramoSeatsRequest();
         request.setDefaultSpecification("RSAfull");
         request.setSeries(new ec.demetra.xml.core.XmlTs());
         ec.demetra.xml.core.XmlTsData.MARSHALLER.marshal(Data.X, request.getSeries());
 
-        Response resp = callWSTramoSeats(request);
-
+        Response resp = callWSTramoSeats(request, MediaType.APPLICATION_XML, MediaType.APPLICATION_XML);
         Assert.assertEquals(200, resp.getStatus());
-
         XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
         Assert.assertNotNull(set);
     }
 
     @Test
-    public void tramoseatsRequests() {
+    public void tramoseatsRequestJSON() {
+        XmlTramoSeatsRequest request = new XmlTramoSeatsRequest();
+        request.setDefaultSpecification("RSAfull");
+        request.setSeries(new ec.demetra.xml.core.XmlTs());
+        ec.demetra.xml.core.XmlTsData.MARSHALLER.marshal(Data.X, request.getSeries());
+
+        Response resp = callWSTramoSeats(request, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+        Assert.assertEquals(200, resp.getStatus());
+        XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
+        Assert.assertNotNull(set);
+    }
+
+    @Test
+    public void tramoseatsRequestsXML() {
         int N = 10;
         XmlTramoSeatsRequests requests = new XmlTramoSeatsRequests();
         requests.setFlat(true);
@@ -123,7 +135,7 @@ public class TramoSeatsTest extends JerseyTest {
         requests.getOutputFilter().add("residuals.*");
         requests.getOutputFilter().add("*_f");
 
-        Response resp = callWSTramoSeats(requests);
+        Response resp = callWSTramoSeats(requests, MediaType.APPLICATION_XML, MediaType.APPLICATION_XML);
 
         Assert.assertEquals(200, resp.getStatus());
 
@@ -131,7 +143,42 @@ public class TramoSeatsTest extends JerseyTest {
         Assert.assertNotNull(set);
     }
 
-    public Response callWSTramoSeats(XmlTsData ts) {
+    @Test
+    public void tramoseatsRequestsJSON() {
+        int N = 10;
+        XmlTramoSeatsRequests requests = new XmlTramoSeatsRequests();
+        requests.setFlat(true);
+        for (int i = 0; i < N; ++i) {
+            XmlTramoSeatsRequest cur = new XmlTramoSeatsRequest();
+            cur.setSpecification(advanced());
+            cur.setSeries(new ec.demetra.xml.core.XmlTs());
+            ec.demetra.xml.core.XmlTsData.MARSHALLER.marshal(Data.P, cur.getSeries());
+            requests.getItems().add(cur);
+        }
+        requests.setContext(context());
+
+        requests.getOutputFilter().add("arima.*");
+        requests.getOutputFilter().add("likelihood.*");
+        requests.getOutputFilter().add("residuals.*");
+        requests.getOutputFilter().add("*_f");
+
+        try {
+            String json = TestConfig.serializationJson(requests);
+        } catch (JsonProcessingException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        Response resp = callWSTramoSeats(requests, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+
+        if (resp.getStatus() != 200) {
+            Assert.fail(resp.readEntity(String.class));
+        } else {
+            Assert.assertEquals(200, resp.getStatus());
+            XmlInformationSet set = resp.readEntity(XmlInformationSet.class);
+            Assert.assertNotNull(set);
+        }
+    }
+
+    private Response callWSTramoSeats(XmlTsData ts) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
@@ -146,30 +193,30 @@ public class TramoSeatsTest extends JerseyTest {
         return resp;
     }
 
-    public Response callWSTramoSeats(XmlTramoSeatsRequest request) {
+    private Response callWSTramoSeats(XmlTramoSeatsRequest request, String inputType, String outputType) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
         JerseyWebTarget jwt = jc.target(getBaseUri());
         Response resp = jwt.path("tramoseats/request")
-                .request(MediaType.APPLICATION_XML)
+                .request(outputType)
                 .acceptEncoding("gzip")
-                .post(Entity.entity(request, MediaType.APPLICATION_XML));
+                .post(Entity.entity(request, inputType));
 
         return resp;
     }
 
-    public Response callWSTramoSeats(XmlTramoSeatsRequests requests) {
+    private Response callWSTramoSeats(XmlTramoSeatsRequests requests, String inputType, String outputType) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
         jcb.register(GZipEncoder.class);
         JerseyClient jc = jcb.build();
 
         JerseyWebTarget jwt = jc.target(getBaseUri());
         Response resp = jwt.path("tramoseats/requests")
-                .request(MediaType.APPLICATION_XML)
+                .request(outputType)
                 .acceptEncoding("gzip")
-                .post(Entity.entity(requests, MediaType.APPLICATION_XML));
+                .post(Entity.entity(requests, inputType));
 
         return resp;
     }

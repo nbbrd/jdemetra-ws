@@ -11,13 +11,14 @@ import javax.ws.rs.core.MultivaluedMap;
  * */
 public class CORSFilter implements ContainerResponseFilter {
 
+    @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
 
         MultivaluedMap<String, Object> headers = responseContext.getHeaders();
         headers.add("Access-Control-Allow-Origin", "*");        
         headers.add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");            
-        headers.add("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
+        headers.add("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Content-Encoding, Accept-Encoding");
     }
 
 }

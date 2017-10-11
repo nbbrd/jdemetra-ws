@@ -17,6 +17,8 @@
 package ec.nbb.demetra;
 
 import ec.nbb.ws.json.JacksonJsonProvider;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -45,17 +47,15 @@ public class ApplicationConfig extends Application {
         resources.add(ec.nbb.ws.filters.GZipReaderInterceptor.class);
         resources.add(ec.nbb.demetra.filters.ChartBodyWriter.class);
 
-        resources.add(ec.nbb.demetra.rest.AnomalyDetectionResource.class);
-        resources.add(ec.nbb.demetra.rest.ForecastingResource.class);
-        resources.add(ec.nbb.demetra.rest.CheckLastResource.class);
-        resources.add(ec.nbb.demetra.rest.BenchmarkingResource.class);
-        resources.add(ec.nbb.demetra.rest.TramoSeatsResource.class);
-        resources.add(ec.nbb.demetra.rest.X13Resource.class);
-        resources.add(ec.nbb.demetra.rest.HodrickPrescottResource.class);
-        resources.add(ec.nbb.demetra.rest.TsDataResource.class);
-        resources.add(ec.nbb.demetra.rest.ChartResource.class);
-        resources.add(ec.nbb.demetra.rest.TestXmlResource.class);
-
         return resources;
     }
+
+    @Override
+    public Map<String, Object> getProperties() {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("jersey.config.server.wadl.disableWadl", true);
+        properties.put("jersey.config.server.provider.packages", "ec.nbb.demetra.rest");
+        return properties;
+    }
+
 }

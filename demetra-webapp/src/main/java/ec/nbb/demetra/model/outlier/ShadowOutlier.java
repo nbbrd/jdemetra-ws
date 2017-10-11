@@ -40,19 +40,19 @@ public class ShadowOutlier {
 
     @ApiModelProperty(notes = "OutlierType", allowableValues = "AO, SO, LS, TC")
     @JsonProperty(value = "OutlierType")
-    @XmlElement
+    @XmlElement(name = "OutlierType")
     private OutlierType outlierType;
 
     @JsonProperty(value = "Period")
-    @XmlElement
+    @XmlElement(name = "Period")
     private XmlTsPeriod period;
 
     @JsonProperty(value = "Value")
-    @XmlElement
+    @XmlElement(name = "Value")
     public double value;
 
     @JsonProperty(value = "StDev")
-    @XmlElement
+    @XmlElement(name = "StDev")
     public double stdev;
 
     public OutlierType getOutlierType() {
