@@ -69,7 +69,9 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 /**
  * Tests for the outlier detection service
@@ -81,6 +83,9 @@ public class NewXMLTest extends JerseyTest {
     private final static String INFOSET = "test/infoset", INFO = "test/info", TSDATA = "test/tsdata", X13_REQUEST = "test/x13/request";
     private static JerseyWebTarget jwt;
 
+    @ClassRule
+    public static TemporaryFolder temp = new TemporaryFolder();
+
     @Override
     protected Application configure() {
         Logger logger = Logger.getGlobal();
@@ -91,7 +96,6 @@ public class NewXMLTest extends JerseyTest {
                 .register(ec.nbb.ws.filters.GZipWriterInterceptor.class)
                 .register(ec.nbb.ws.filters.GZipReaderInterceptor.class)
                 .register(ec.nbb.demetra.filters.ChartBodyWriter.class)
-                //.register(MyJacksonJsonProvider.class)
                 .register(ec.nbb.ws.filters.CORSFilter.class)
                 .register(new LoggingFilter(logger, true));
     }
@@ -103,8 +107,7 @@ public class NewXMLTest extends JerseyTest {
 
     @BeforeClass
     public static void setupJerseyLog() throws Exception {
-        String tmp = System.getProperty("java.io.tmpdir");
-        Handler fh = new FileHandler(tmp + "jersey_test.log");
+        Handler fh = new FileHandler(temp.newFile("jersey_test.log").getAbsolutePath());
         Logger.getLogger("").addHandler(fh);
         Logger.getLogger("com.sun.jersey").setLevel(Level.FINEST);
     }
@@ -145,10 +148,6 @@ public class NewXMLTest extends JerseyTest {
         TsData d = TsData.random(TsFrequency.Monthly);
         Information info = new Information("y", d);
         XmlInformation xmlInfo = XmlInformation.create(info);
-
-        Response xmlResp = callWS(INFO, xmlInfo, MediaType.APPLICATION_XML);
-        Assert.assertEquals(200, xmlResp.getStatus());
-        XmlInformation xml = xmlResp.readEntity(XmlInformation.class);
 
         Response jsonResp = callWS(INFO, xmlInfo, MediaType.APPLICATION_JSON);
         Assert.assertEquals(200, jsonResp.getStatus());
@@ -198,15 +197,13 @@ public class NewXMLTest extends JerseyTest {
 
         Response xmlResp = callWS(X13_REQUEST, request, MediaType.APPLICATION_XML);
         Assert.assertEquals(200, xmlResp.getStatus());
-        XmlX13Request xml = xmlResp.readEntity(XmlX13Request.class);
-        Response jsonResp = callWS(X13_REQUEST, request, MediaType.APPLICATION_JSON);
-        if (jsonResp.getStatus() != 200) {
-            Assert.fail(jsonResp.readEntity(String.class));
+        if (xmlResp.getStatus() != 200) {
+            Assert.fail(xmlResp.readEntity(String.class));
         } else {
-            XmlX13Request json = jsonResp.readEntity(XmlX13Request.class);
+            XmlX13Request json = xmlResp.readEntity(XmlX13Request.class);
             Assert.assertEquals(s.getValues().length, json.getSeries().getValues().length);
         }
-    }    
+    }
 
     @Test
     public void x13CustomWithContext() throws JsonProcessingException {
@@ -321,3 +318,4 @@ public class NewXMLTest extends JerseyTest {
         return context;
     }
 }
+

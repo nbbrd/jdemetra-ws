@@ -47,6 +47,7 @@ import org.glassfish.jersey.message.GZipEncoder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openide.util.Exceptions;
 
@@ -143,7 +144,7 @@ public class TramoSeatsTest extends JerseyTest {
         Assert.assertNotNull(set);
     }
 
-    @Test
+    @Ignore
     public void tramoseatsRequestsJSON() {
         int N = 10;
         XmlTramoSeatsRequests requests = new XmlTramoSeatsRequests();

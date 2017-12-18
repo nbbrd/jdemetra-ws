@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 National Bank of Belgium
+ * Copyright 2017 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or – as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -17,8 +17,6 @@
 package ec.nbb.demetra.rest.test;
 
 import ec.tss.xml.XmlTsData;
-import ec.tstoolkit.timeseries.simplets.TsData;
-import ec.tstoolkit.timeseries.simplets.TsFrequency;
 import java.net.URI;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
@@ -31,6 +29,7 @@ import org.glassfish.jersey.message.GZipEncoder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -38,7 +37,9 @@ import org.junit.Test;
  * @author Mats Maggi
  */
 public class CheckLastTest extends JerseyTest {
-    
+
+    private static final XmlTsData data = new XmlTsData();
+
     @Override
     protected Application configure() {
         return new ResourceConfig()
@@ -58,49 +59,71 @@ public class CheckLastTest extends JerseyTest {
         return TestConfig.getURI();
     }
 
-    @Test
-    public void checkLast() {
-        TsData d = TsData.random(TsFrequency.Monthly);
-        XmlTsData xml = new XmlTsData();
-        xml.copy(d);
+    @BeforeClass
+    public static void setupTsData() {
+        data.copy(Data.X);
+    }
 
-        Response resp = callWS(xml, MediaType.APPLICATION_JSON);
+    @Test
+    public void checkLast1() {
+        Response resp = callWS(data, MediaType.APPLICATION_JSON);
         Assert.assertEquals(200, resp.getStatus());
-        
-        resp = callWS(xml, MediaType.APPLICATION_XML);
+    }
+
+    @Test
+    public void checkLast2() {
+        Response resp = callWS(data, MediaType.APPLICATION_XML);
         Assert.assertEquals(200, resp.getStatus());
-        
-        resp = callWS(xml, MediaType.APPLICATION_JSON);
+    }
+
+    @Test
+    public void checkLast3() {
+        Response resp = callWS(data, MediaType.APPLICATION_JSON, 1, "tramoseats", "RSA4");
         Assert.assertEquals(200, resp.getStatus());
-        
-        resp = callWS(xml, MediaType.APPLICATION_XML);
+    }
+
+    @Test
+    public void checkLast4() {
+        Response resp = callWS(data, MediaType.APPLICATION_XML, 1, "tramoseats", "RSA4");
         Assert.assertEquals(200, resp.getStatus());
-        
-        resp = callWS(xml, MediaType.APPLICATION_JSON, 1, "tramoseats", "RSA4");
-        Assert.assertEquals(200, resp.getStatus());
-        
-        resp = callWS(xml, MediaType.APPLICATION_XML, 1, "tramoseats", "RSA4");
-        Assert.assertEquals(200, resp.getStatus());
-        
-        resp = callWS(xml, MediaType.APPLICATION_JSON, 1, "tramoseats", "MY_SPEC");
-        Assert.assertEquals(500, resp.getStatus());
-        
-        resp = callWS(xml, MediaType.APPLICATION_XML, 1, "tramoseats", "MY_SPEC");
-        Assert.assertEquals(500, resp.getStatus());
-        
-        resp = callWS(xml, MediaType.APPLICATION_JSON, 1, "x13", "RG3");
-        Assert.assertEquals(200, resp.getStatus());
-        
-        resp = callWS(xml, MediaType.APPLICATION_XML, 1, "x13", "RG3");
-        Assert.assertEquals(200, resp.getStatus());
-        
-        resp = callWS(xml, MediaType.APPLICATION_JSON, 1, "tramoseats", "RG3");
-        Assert.assertEquals(500, resp.getStatus());
-        
-        resp = callWS(xml, MediaType.APPLICATION_XML, 1, "tramoseats", "RG3");
+    }
+
+    @Test
+    public void checkLast5() {
+        Response resp = callWS(data, MediaType.APPLICATION_JSON, 1, "tramoseats", "MY_SPEC");
         Assert.assertEquals(500, resp.getStatus());
     }
-    
+
+    @Test
+    public void checkLast6() {
+        Response resp = callWS(data, MediaType.APPLICATION_XML, 1, "tramoseats", "MY_SPEC");
+        Assert.assertEquals(500, resp.getStatus());
+    }
+
+    @Test
+    public void checkLast7() {
+        Response resp = callWS(data, MediaType.APPLICATION_JSON, 1, "x13", "RG3");
+        Assert.assertEquals(200, resp.getStatus());
+    }
+
+    @Test
+    public void checkLast8() {
+        Response resp = callWS(data, MediaType.APPLICATION_XML, 1, "x13", "RG3");
+        Assert.assertEquals(200, resp.getStatus());
+    }
+
+    @Test
+    public void checkLast9() {
+        Response resp = callWS(data, MediaType.APPLICATION_JSON, 1, "tramoseats", "RG3");
+        Assert.assertEquals(500, resp.getStatus());
+    }
+
+    @Test
+    public void checkLast10() {
+        Response resp = callWS(data, MediaType.APPLICATION_XML, 1, "tramoseats", "RG3");
+        Assert.assertEquals(500, resp.getStatus());
+    }
+
     private Response callWS(XmlTsData ts, String type) {
         return callWS(ts, type, 1, "tramoseats", "TRfull");
     }

@@ -42,9 +42,9 @@ import java.util.stream.IntStream;
  */
 public class RestUtils {
 
-    private static TsImportOptions options = TsImportOptions.create(DataFormat.create(null, "yyyy-MM-dd", null), ObsGathering.DEFAULT);
-    private static TsExportOptions export = TsExportOptions.create(true, true, true, true);
-    private static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    private static final TsImportOptions OPTIONS = TsImportOptions.create(DataFormat.create(null, "yyyy-MM-dd", null), ObsGathering.DEFAULT);
+    private static final TsExportOptions EXPORT = TsExportOptions.create(true, true, true, true);
+    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
 
     public static TsDomain createTsDomain(int start, int end, TsFrequency freq) {
         TsPeriod s = toPeriod(start, freq);
@@ -104,20 +104,20 @@ public class RestUtils {
         for (int i = 0; i < series.getData().size(); i++) {
             asb.column(1, i + 1, series.getData().get(i));
         }
-        return gridFactory.toTsCollectionInfo(asb.build(), options);
+        return gridFactory.toTsCollectionInfo(asb.build(), OPTIONS);
     }
 
     public static ExcelSeries toExcelSeries(TsCollectionInformation coll) {
         ExcelSeries s = new ExcelSeries();
         SpreadSheetFactory gridFactory = SpreadSheetFactory.getDefault();
-        ArraySheet sheet = gridFactory.fromTsCollectionInfo(coll, export);
+        ArraySheet sheet = gridFactory.fromTsCollectionInfo(coll, EXPORT);
         Table t = gridFactory.toTable(sheet);
         
         // periods
         SubArray<Date> p = t.column(0);
         List<String> periods = new ArrayList<>();
         for (int i = 1; i < p.getLength(); i++) {
-            periods.add(formatter.format(p.get(i)));
+            periods.add(FORMATTER.format(p.get(i)));
         }
         s.setPeriods(periods);
         

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 National Bank of Belgium
+ * Copyright 2017 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or – as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -21,11 +21,7 @@ import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URI;
-import javax.imageio.ImageIO;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
@@ -90,24 +86,11 @@ public class ChartTest extends JerseyTest {
             case "image/svg+xml":
                 String svgImage = resp.readEntity(String.class);
                 Assert.assertNotNull(svgImage);
-
-                try (PrintWriter out = new PrintWriter(String.format("C:\\Temp\\%s.svg", xmlTsData.name))) {
-                    out.println(svgImage);
-                } catch (IOException ex) {
-                    Assert.fail(ex.getMessage());
-                }
                 break;
             case "image/png":
             case "image/jpeg":
                 BufferedImage image = resp.readEntity(BufferedImage.class);
                 Assert.assertNotNull(image);
-                String subType = resp.getMediaType().getSubtype();
-                try {
-                    String path = System.getProperty("java.io.tmpdir");
-                    ImageIO.write(image, subType, new File(String.format(path + "%s.%s", xmlTsData.name, subType)));
-                } catch (IOException ex) {
-                    Assert.fail(ex.getMessage());
-                }
                 break;
         }
     }

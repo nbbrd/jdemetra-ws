@@ -21,7 +21,6 @@ import ec.nbb.demetra.json.excel.ExcelSeries;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
 import ec.nbb.ws.annotations.Compress;
 import ec.tss.TsCollectionInformation;
-import ec.tss.TsInformation;
 import ec.tstoolkit.modelling.DefaultTransformationType;
 import ec.tstoolkit.modelling.arima.IPreprocessor;
 import ec.tstoolkit.modelling.arima.PreprocessingModel;
@@ -34,6 +33,7 @@ import ec.tstoolkit.timeseries.calendars.TradingDaysType;
 import ec.tstoolkit.timeseries.regression.MissingValueEstimation;
 import ec.tstoolkit.timeseries.regression.OutlierEstimation;
 import ec.tstoolkit.timeseries.regression.OutlierType;
+import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsPeriod;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -67,10 +67,10 @@ public class ColorAnalyserResource {
         IPreprocessor preprocessor = tsspec.build();
         TsCollectionInformation coll = RestUtils.readExcelSeries(series);
 
-        for (TsInformation info : coll.items) {
+        coll.items.stream().forEach((info) -> {
             PreprocessingModel model = preprocessor.process(info.data, null);
             rslts.put(info.name, of(model));
-        }
+        });
 
         return rslts;
     }
@@ -143,35 +143,49 @@ public class ColorAnalyserResource {
 
     private static ColorAnalyserOutput of(PreprocessingModel model) {
         ColorAnalyserOutput o = new ColorAnalyserOutput();
-        o.logs = model.isMultiplicative();
-        o.arima = model.description.getSpecification();
-        TsPeriod start = model.description.getSeriesDomain().getStart();
-        OutlierEstimation[] all = model.outliersEstimation(true, false);
-        if (all != null) {
-            for (OutlierEstimation out : all) {
-                ColorAnalyserOutput.Outlier cur = new ColorAnalyserOutput.Outlier();
-                cur.code = out.getCode();
-                cur.value = out.getValue();
-                cur.stdError = out.getStdev();
-                cur.position = out.getPosition().minus(start);
-                o.outliers.add(cur);
+        if (model != null) {
+            o.computed = true;
+            o.logs = model.isMultiplicative();
+            o.arima = model.description.getSpecification();
+            TsPeriod start = model.description.getSeriesDomain().getStart();
+            OutlierEstimation[] all = model.outliersEstimation(true, false);
+            if (all != null) {
+                for (OutlierEstimation out : all) {
+                    ColorAnalyserOutput.Outlier cur = new ColorAnalyserOutput.Outlier();
+                    cur.code = out.getCode();
+                    cur.value = out.getValue();
+                    cur.stdError = out.getStdev();
+                    cur.position = out.getPosition().minus(start);
+                    o.outliers.add(cur);
+                }
             }
-        }
-        MissingValueEstimation[] missings = model.missings(true);
-        if (missings != null) {
-            for (MissingValueEstimation m : missings) {
-                ColorAnalyserOutput.Missing cur = new ColorAnalyserOutput.Missing();
-                cur.value = m.getValue();
-                cur.stdError = m.getStdev();
-                cur.position = m.getPosition().minus(start);
-                o.missings.add(cur);
-            }
-        }
-        // calendars
-        o.td = model.description.countRegressors(var -> var.isCalendar());
-        o.easter = model.description.countRegressors(var -> var.isMovingHoliday()) > 0;
 
+            MissingValueEstimation[] missings = model.missings(true);
+            if (missings != null) {
+                for (MissingValueEstimation m : missings) {
+                    ColorAnalyserOutput.Missing cur = new ColorAnalyserOutput.Missing();
+                    double mean = m.getValue(), ser = m.getStdev();
+                    if (model.isMultiplicative()) {
+                        double lser = mean + 0.5 * ser * ser;
+                        ser = Math.exp(lser) * Math.sqrt((Math.exp(ser * ser) - 1));
+                        TsData tmp = new TsData(m.getPosition(), new double[]{mean}, false);
+                        model.backTransform(tmp, true, true);
+                        mean = tmp.get(0);
+                    }
+                    cur.value = mean;
+                    cur.stdError = ser;
+                    cur.position = m.getPosition().minus(start);
+                    o.missings.add(cur);
+                }
+            }
+
+            // calendars
+            o.td = model.description.countRegressors(var -> var.isCalendar());
+            o.easter = model.description.countRegressors(var -> var.isMovingHoliday()) > 0;
+
+        }
         return o;
+
     }
 
     @POST

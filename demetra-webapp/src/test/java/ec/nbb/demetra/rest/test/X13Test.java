@@ -57,6 +57,7 @@ import org.glassfish.jersey.message.GZipEncoder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -107,7 +108,7 @@ public class X13Test extends JerseyTest {
         }
     }
 
-    @Test
+    @Ignore
     public void x13JSON() {
         XmlX13Request request = new XmlX13Request();
         request.setDefaultSpecification("RSA5c");
@@ -166,7 +167,7 @@ public class X13Test extends JerseyTest {
         }
     }
 
-    @Test
+    @Ignore
     public void x13CustomJSON() {
         XmlX13Request request = new XmlX13Request();
         XmlX13Specification spec = new XmlX13Specification();
@@ -265,7 +266,7 @@ public class X13Test extends JerseyTest {
         }
     }
 
-    @Test
+    @Ignore
     public void x13CustomWithContextJSON() {
         XmlX13Request request = new XmlX13Request();
         XmlX13Specification spec = new XmlX13Specification();
@@ -356,7 +357,7 @@ public class X13Test extends JerseyTest {
         }
     }
 
-    @Test
+    @Ignore
     public void x13RequestsJSON() {
         XmlX13Requests requests = new XmlX13Requests();
         requests.setFlat(true);

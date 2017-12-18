@@ -17,11 +17,12 @@
 package ec.nbb.demetra.rest;
 
 import ec.benchmarking.simplets.TsCholette;
-import ec.benchmarking.simplets.TsDenton2;
 import ec.benchmarking.simplets.TsExpander;
 import ec.benchmarking.simplets.TsExpander.Model;
 import ec.nbb.demetra.Messages;
 import ec.nbb.demetra.json.excel.ExcelSeries;
+import ec.nbb.demetra.model.rest.utils.DentonProcessing;
+import ec.nbb.demetra.model.rest.utils.DentonSpecification;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
 import ec.nbb.ws.annotations.Compress;
 import ec.tss.TsCollection;
@@ -73,26 +74,23 @@ public class BenchmarkingExcelResource {
             @ApiParam(name = "modified", defaultValue = "true") @QueryParam(value = "modified") @DefaultValue("true") boolean modified,
             @ApiParam(name = "differencing", defaultValue = "1") @QueryParam(value = "differencing") @DefaultValue("1") int differencing,
             @ApiParam(name = "agg", defaultValue = "Sum") @QueryParam(value = "agg") @DefaultValue("Sum") TsAggregationType agg,
-            @ApiParam(name = "defaultFrequency", defaultValue = "0") @QueryParam(value = "defaultFreq") @DefaultValue("0") int defaultFreq
-    ) {
-        TsDenton2 denton = new TsDenton2();
-        denton.setAggregationType(agg);
-        denton.setDifferencingOrder(differencing);
-        denton.setModified(modified);
-        denton.setMultiplicative(mul);
-
+            @ApiParam(name = "freq", defaultValue = "0") @QueryParam(value = "freq") @DefaultValue("0") int freq) {
         TsCollectionInformation info = RestUtils.readExcelSeries(series);
-
         if (!info.hasData() || info.items.isEmpty()) {
             throw new IllegalArgumentException("1 or 2 series must be provided !");
         }
 
+        DentonSpecification spec = new DentonSpecification();
+        spec.setType(agg);
+        spec.setDifferencing(differencing);
+        spec.setModified(modified);
+        spec.setMultiplicative(mul);
+
         TsData xbench = null;
         if (info.items.size() == 1) {
-            denton.setDefaultFrequency(TsFrequency.valueOf(defaultFreq));
-            xbench = denton.process(null, info.items.get(0).data);
+            xbench = DentonProcessing.process(info.items.get(0).data, TsFrequency.valueOf(freq), spec);
         } else if (info.items.size() == 2) {
-            xbench = denton.process(info.items.get(0).data, info.items.get(1).data);
+            xbench = DentonProcessing.process(info.items.get(0).data, info.items.get(1).data, spec);
         }
 
         if (xbench != null) {
@@ -150,7 +148,7 @@ public class BenchmarkingExcelResource {
             throw new IllegalArgumentException(Messages.PROCESSING_ERROR);
         }
     }
-    
+
     @POST
     @Compress
     @Path("/expander")
@@ -183,10 +181,10 @@ public class BenchmarkingExcelResource {
         }
         expander.useConst(constant);
         expander.useTrend(trend);
-        
+
         TsCollectionInformation infoColl = RestUtils.readExcelSeries(series);
         TsCollection coll = TsFactory.instance.createTsCollection("results");
-        
+
         if (infoColl == null) {
             throw new IllegalArgumentException(Messages.TS_NULL);
         } else {
@@ -203,7 +201,7 @@ public class BenchmarkingExcelResource {
                 }
             });
         }
-        
+
         // Format results
         ExcelSeries response = RestUtils.toExcelSeries(new TsCollectionInformation(coll, TsInformationType.Data));
         return Response.ok().entity(response).build();

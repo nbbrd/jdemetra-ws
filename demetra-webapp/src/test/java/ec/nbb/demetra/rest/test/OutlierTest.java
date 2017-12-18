@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 National Bank of Belgium
+ * Copyright 2017 National Bank of Belgium
  *
  * Licensed under the EUPL, Version 1.1 or â€“ as soon they will be approved 
  * by the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -19,7 +19,6 @@ package ec.nbb.demetra.rest.test;
 import ec.nbb.demetra.model.outlier.ShadowOutlier;
 import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.simplets.TsData;
-import ec.tstoolkit.timeseries.simplets.TsFrequency;
 import java.net.URI;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
@@ -40,7 +39,7 @@ import org.junit.Test;
  * @author Mats Maggi
  */
 public class OutlierTest extends JerseyTest {
-    
+
     @Override
     protected Application configure() {
         return new ResourceConfig()
@@ -62,8 +61,8 @@ public class OutlierTest extends JerseyTest {
 
     @Test
     public void outlierNewTest() {
-        TsData d = TsData.random(TsFrequency.Monthly);
-        d.set(d.getObsCount() / 2, 1000); // Creating an outlier
+        TsData d = Data.P;
+        d.set(d.getObsCount() / 2, d.get(d.getObsCount() / 2) * 5); // Creating an outlier
         XmlTsData ts = new XmlTsData();
         ts.name = "ts";
         ts.copy(d);
@@ -79,6 +78,6 @@ public class OutlierTest extends JerseyTest {
                 .post(Entity.entity(ts, MediaType.APPLICATION_JSON));
         Assert.assertEquals(200, resp.getStatus());
         ShadowOutlier[] outliers = resp.readEntity(ShadowOutlier[].class);
-        Assert.assertEquals(1, outliers.length);
+        Assert.assertEquals(3, outliers.length);
     }
 }

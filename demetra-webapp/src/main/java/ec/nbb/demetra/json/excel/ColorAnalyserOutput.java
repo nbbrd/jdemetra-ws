@@ -75,18 +75,24 @@ public class ColorAnalyserOutput {
     public List<Outlier> outliers = new ArrayList<>();
     @JsonProperty("missings")
     public List<Missing> missings = new ArrayList<>();
+    @JsonProperty("computed")
+    public boolean computed = false;
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Log: ").append(logs).append(System.lineSeparator());
-        builder.append("Arima: ").append(arima).append(System.lineSeparator());
-        builder.append("TD: ").append(td).append(System.lineSeparator());
-        builder.append("Easter: ").append(easter).append(System.lineSeparator());
-        builder.append("Outliers: ").append(System.lineSeparator());
-        outliers.forEach(o -> builder.append("    ").append(o));
-        builder.append("Missings: ").append(System.lineSeparator());
-        missings.forEach(o -> builder.append("    ").append(o));
+        if (computed) {
+            builder.append("Log: ").append(logs).append(System.lineSeparator());
+            builder.append("Arima: ").append(arima).append(System.lineSeparator());
+            builder.append("TD: ").append(td).append(System.lineSeparator());
+            builder.append("Easter: ").append(easter).append(System.lineSeparator());
+            builder.append("Outliers: ").append(System.lineSeparator());
+            outliers.forEach(o -> builder.append("    ").append(o));
+            builder.append("Missings: ").append(System.lineSeparator());
+            missings.forEach(o -> builder.append("    ").append(o));
+        } else {
+            builder.append("Not computed").append(System.lineSeparator());
+        }
 
         return builder.toString();
     }
