@@ -19,8 +19,11 @@ package ec.nbb.demetra.rest;
 import ec.nbb.demetra.json.excel.ColorAnalyserOutput;
 import ec.nbb.demetra.json.excel.ExcelSeries;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
+import ec.nbb.demetra.model.rest.utils.SheetAdapter;
 import ec.nbb.ws.annotations.Compress;
 import ec.tss.TsCollectionInformation;
+import ec.tss.tsproviders.spreadsheet.engine.SpreadSheetFactory;
+import ec.tss.tsproviders.spreadsheet.engine.TsImportOptions;
 import ec.tstoolkit.modelling.DefaultTransformationType;
 import ec.tstoolkit.modelling.arima.IPreprocessor;
 import ec.tstoolkit.modelling.arima.PreprocessingModel;
@@ -66,6 +69,21 @@ public class ColorAnalyserResource {
         TramoSpecification tsspec = of(spec);
         IPreprocessor preprocessor = tsspec.build();
         TsCollectionInformation coll = RestUtils.readExcelSeries(series);
+
+        coll.items.stream().forEach((info) -> {
+            PreprocessingModel model = preprocessor.process(info.data, null);
+            rslts.put(info.name, of(model));
+        });
+
+        return rslts;
+    }
+    
+    static Map<String, ColorAnalyserOutput> process(Object[][] range, ColorAnalyserSpec spec) {
+        Map<String, ColorAnalyserOutput> rslts = new HashMap<>();
+        TramoSpecification tsspec = of(spec);
+        IPreprocessor preprocessor = tsspec.build();
+        SheetAdapter sheet = new SheetAdapter(range);
+        TsCollectionInformation coll = SpreadSheetFactory.getDefault().toTsCollectionInfo(sheet, TsImportOptions.getDefault());
 
         coll.items.stream().forEach((info) -> {
             PreprocessingModel model = preprocessor.process(info.data, null);
@@ -186,6 +204,42 @@ public class ColorAnalyserResource {
         }
         return o;
 
+    }
+    
+    @POST
+    @Path("/range")
+    @Compress
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Returns the results of the Color Analyser", response = ColorAnalyserOutput.class, responseContainer = "Map")
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "Color Analyser results successfully processed", response = ColorAnalyserOutput.class, responseContainer = "Map"),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response colorAnalyserRange(@ApiParam(name = "range", required = true) Object[][] range,
+            @ApiParam(name = "transformation", defaultValue = "-1") @QueryParam(value = "transformation") @DefaultValue("-1") int transformation,
+            @ApiParam(name = "calendarEffect", defaultValue = "-1") @QueryParam(value = "calendarEffect") @DefaultValue("-1") int calendarEffect,
+            @ApiParam(name = "ami", defaultValue = "true") @QueryParam(value = "ami") @DefaultValue("true") boolean ami,
+            @ApiParam(name = "ao", defaultValue = "true") @QueryParam(value = "ao") @DefaultValue("true") boolean ao,
+            @ApiParam(name = "ls", defaultValue = "true") @QueryParam(value = "ls") @DefaultValue("true") boolean ls,
+            @ApiParam(name = "tc", defaultValue = "true") @QueryParam(value = "tc") @DefaultValue("true") boolean tc,
+            @ApiParam(name = "so", defaultValue = "false") @QueryParam(value = "so") @DefaultValue("false") boolean so,
+            @ApiParam(name = "critical", defaultValue = "0") @QueryParam(value = "critical") @DefaultValue("0") double critical) {
+        ColorAnalyserSpec spec = new ColorAnalyserSpec();
+        spec.transformation = transformation;
+        spec.calendarEffect = calendarEffect;
+        spec.ami = ami;
+        spec.AO = ao;
+        spec.LS = ls;
+        spec.TC = tc;
+        spec.SO = so;
+        spec.criticalValue = critical;
+
+        Map<String, ColorAnalyserOutput> results = process(range, spec);
+        return Response.ok().entity(results).build();
     }
 
     @POST

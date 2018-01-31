@@ -19,16 +19,22 @@ package ec.nbb.demetra.rest;
 import ec.nbb.demetra.json.JsonTsCollection;
 import ec.nbb.demetra.json.excel.ExcelSeries;
 import ec.nbb.demetra.model.rest.utils.RestUtils;
+import ec.nbb.demetra.model.rest.utils.SheetAdapter;
 import ec.nbb.ws.annotations.Compress;
 import ec.tss.TsCollection;
 import ec.tss.TsCollectionInformation;
 import ec.tss.TsFactory;
 import ec.tss.TsInformation;
 import ec.tss.TsInformationType;
+import ec.tss.tsproviders.spreadsheet.engine.SpreadSheetFactory;
+import ec.tss.tsproviders.spreadsheet.engine.TsImportOptions;
+import ec.tss.tsproviders.utils.DataFormat;
+import ec.tss.tsproviders.utils.ObsGathering;
 import ec.tss.xml.XmlTsData;
 import ec.tstoolkit.timeseries.TsAggregationType;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
+import ec.util.spreadsheet.helpers.ArraySheet;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -118,6 +124,25 @@ public class TsDataResource {
         json.from(ts);
 
         return Response.ok().entity(json).build();
+    }
+    
+    @POST
+    @Compress
+    @Path("/range")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Test reading excel range", response = Object[][].class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "Successful read", response = Object[][].class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response rangeTest(@ApiParam(name = "range", required = true) Object[][] range) {
+        SheetAdapter sheet = new SheetAdapter(range);
+        TsCollectionInformation info = SpreadSheetFactory.getDefault().toTsCollectionInfo(sheet, TsImportOptions.getDefault());
+        return Response.ok(range).build();
     }
 
     @POST
