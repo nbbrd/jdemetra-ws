@@ -20,6 +20,10 @@ import ec.benchmarking.simplets.TsCholette;
 import ec.benchmarking.simplets.TsExpander;
 import ec.benchmarking.simplets.TsExpander.Model;
 import ec.nbb.demetra.Messages;
+import ec.nbb.demetra.benchmarking.TempDisaggOutput;
+import ec.nbb.demetra.benchmarking.TempDisaggOutputJson;
+import ec.nbb.demetra.benchmarking.TempDisaggSpec;
+import static ec.nbb.demetra.benchmarking.TemporalDisaggregation.process;
 import ec.nbb.demetra.json.excel.ExcelSeries;
 import ec.nbb.demetra.model.rest.utils.DentonProcessing;
 import ec.nbb.demetra.model.rest.utils.DentonSpecification;
@@ -29,6 +33,8 @@ import ec.tss.TsCollection;
 import ec.tss.TsCollectionInformation;
 import ec.tss.TsFactory;
 import ec.tss.TsInformationType;
+import ec.tstoolkit.Parameter;
+import ec.tstoolkit.ParameterType;
 import ec.tstoolkit.timeseries.TsAggregationType;
 import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
@@ -37,6 +43,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
@@ -205,5 +212,59 @@ public class BenchmarkingExcelResource {
         // Format results
         ExcelSeries response = RestUtils.toExcelSeries(new TsCollectionInformation(coll, TsInformationType.Data));
         return Response.ok().entity(response).build();
+    }
+
+    @POST
+    @Compress
+    @Path("/tempdisagg")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Temporal Disaggregation processing", notes = "Computes a temporal disaggregation on given series", response = ExcelSeries.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "Temporal disaggregation successfully done", response = ExcelSeries.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response tempDisaggregation(@ApiParam(value = "series", required = true) Map<String, ExcelSeries> series,
+            @ApiParam(name = "defaultFreq") @QueryParam(value = "defaultFreq") int defaultFreq,
+            @ApiParam(name = "useParam", defaultValue = "false") @QueryParam(value = "useParam") @DefaultValue("false") boolean useParam,
+            @ApiParam(name = "parameter", defaultValue = "0.9") @QueryParam(value = "parameter") @DefaultValue("0.9") double parameter,
+            @ApiParam(name = "trend", defaultValue = "false") @QueryParam(value = "trend") @DefaultValue("false") boolean trend,
+            @ApiParam(name = "constant", defaultValue = "true") @QueryParam(value = "constant") @DefaultValue("true") boolean constant,
+            @ApiParam(name = "model", defaultValue = "Ar1") @QueryParam(value = "model") @DefaultValue("Ar1") TempDisaggSpec.Model model,
+            @ApiParam(name = "agg", defaultValue = "Sum") @QueryParam(value = "agg") @DefaultValue("Sum") TsAggregationType agg) {
+        TempDisaggSpec spec = new TempDisaggSpec();
+        spec.setDefaultFrequency(TsFrequency.valueOf(defaultFreq));
+        spec.setTrend(trend);
+        spec.setConstant(constant);
+        spec.setModel(model);
+        if (useParam) {
+            Parameter p = new Parameter(parameter, ParameterType.Fixed);
+            spec.setParameter(p);
+        }
+        spec.setType(agg);
+
+        if (!series.containsKey("input")) {
+            throw new IllegalArgumentException("Map of series doesn't contain any input series");
+        }
+
+        TsCollectionInformation input = RestUtils.readExcelSeries(series.get("input"));
+        TsData y = input.items.get(0).data;
+
+        TsData[] x = null;
+        if (series.containsKey("indicators")) {
+            TsCollectionInformation indicators = RestUtils.readExcelSeries(series.get("indicators"));
+            x = indicators.items.stream().map(tsInfo -> tsInfo.data).toArray(TsData[]::new);
+        }
+
+        TempDisaggOutput output = process(y, x, spec);
+        if (output == null) {
+            return Response.serverError().entity("Unable to get results !").build();
+        } else {
+            TempDisaggOutputJson json = new TempDisaggOutputJson(output);
+            return Response.ok().entity(json).build();
+        }
     }
 }

@@ -25,6 +25,7 @@ import ec.tss.tsproviders.utils.DataFormat;
 import ec.tss.tsproviders.utils.ObsGathering;
 import ec.tstoolkit.data.SubArray;
 import ec.tstoolkit.data.Table;
+import ec.tstoolkit.timeseries.simplets.TsData;
 import ec.tstoolkit.timeseries.simplets.TsDomain;
 import ec.tstoolkit.timeseries.simplets.TsFrequency;
 import ec.tstoolkit.timeseries.simplets.TsPeriod;
@@ -139,6 +140,28 @@ public class RestUtils {
         for (int i = 1; i < n.getLength(); i++) {
             names.add(n.get(i));
         }
+        s.setNames(names);
+        
+        return s;
+    }
+    
+    public static ExcelSeries toExcelSeries(TsData ts, String name) {
+        ExcelSeries s = new ExcelSeries();
+        TsDomain dom = ts.getDomain();
+        // periods
+        List<String> periods = dom.stream()
+                .map(p -> FORMATTER.format(p.middle()))
+                .collect(Collectors.toList());
+        s.setPeriods(periods);
+
+        // data
+        List<List<Double>> data = new ArrayList<>();
+        data.add(ts.stream().map(obs -> obs.getValue()).collect(Collectors.toList()));
+        s.setData(data);
+        
+        // names
+        List<String> names = new ArrayList<>();
+        names.add(name);
         s.setNames(names);
         
         return s;
