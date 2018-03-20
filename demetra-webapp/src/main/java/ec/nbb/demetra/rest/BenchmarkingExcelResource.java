@@ -97,7 +97,12 @@ public class BenchmarkingExcelResource {
         if (info.items.size() == 1) {
             xbench = DentonProcessing.process(info.items.get(0).data, TsFrequency.valueOf(freq), spec);
         } else if (info.items.size() == 2) {
-            xbench = DentonProcessing.process(info.items.get(0).data, info.items.get(1).data, spec);
+            TsData sa = info.items.get(0).data;
+            TsData raw = info.items.get(1).data;
+            if (raw.getFrequency() != TsFrequency.Yearly) {
+                raw = raw.changeFrequency(TsFrequency.Yearly, agg, true);
+            }
+            xbench = DentonProcessing.process(sa, raw, spec);
         }
 
         if (xbench != null) {
