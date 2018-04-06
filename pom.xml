@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ec.nbb.demetra</groupId>
     <artifactId>webservice-parent</artifactId>
-    <version>2.2.1-RC1</version>
+    <version>2.2.1-RC2</version>
     <packaging>pom</packaging>
     <name>JDemetra+ Web Service</name>
     <modules>
@@ -15,7 +15,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ws-version>2.2.1-RC1</ws-version>
+        <ws-version>2.2.1-RC2</ws-version>
         <junit-version>4.12</junit-version>
         <version.jersey>2.21</version.jersey>
         <swagger.version>1.5.9</swagger.version>

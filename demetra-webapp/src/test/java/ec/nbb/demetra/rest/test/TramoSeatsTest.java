@@ -121,12 +121,13 @@ public class TramoSeatsTest extends JerseyTest {
     public void tramoseatsRequestsXML() {
         int N = 10;
         XmlTramoSeatsRequests requests = new XmlTramoSeatsRequests();
-        requests.setFlat(true);
+        requests.setFlat(false);
         for (int i = 0; i < N; ++i) {
             XmlTramoSeatsRequest cur = new XmlTramoSeatsRequest();
             cur.setSpecification(advanced());
-            cur.setSeries(new ec.demetra.xml.core.XmlTs());
+            cur.setSeries(new ec.demetra.xml.core.XmlTs());            
             ec.demetra.xml.core.XmlTsData.MARSHALLER.marshal(Data.P, cur.getSeries());
+            cur.getSeries().setName("MySeries" + i);
             requests.getItems().add(cur);
         }
         requests.setContext(context());
