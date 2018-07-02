@@ -71,13 +71,17 @@ public class ColorAnalyserResource {
         TsCollectionInformation coll = RestUtils.readExcelSeries(series);
 
         coll.items.stream().forEach((info) -> {
-            PreprocessingModel model = preprocessor.process(info.data, null);
-            rslts.put(info.name, of(model));
+            if (info.data != null) {
+                PreprocessingModel model = preprocessor.process(info.data, null);
+                rslts.put(info.name, of(model));
+            } else {
+                rslts.put(info.name, null);
+            }
         });
 
         return rslts;
     }
-    
+
     static Map<String, ColorAnalyserOutput> process(Object[][] range, ColorAnalyserSpec spec) {
         Map<String, ColorAnalyserOutput> rslts = new HashMap<>();
         TramoSpecification tsspec = of(spec);
@@ -205,7 +209,7 @@ public class ColorAnalyserResource {
         return o;
 
     }
-    
+
     @POST
     @Path("/range")
     @Compress

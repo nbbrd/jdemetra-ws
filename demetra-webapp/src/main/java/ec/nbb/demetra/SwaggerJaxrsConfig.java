@@ -36,14 +36,14 @@ public class SwaggerJaxrsConfig extends HttpServlet {
         try {
             super.init(servletConfig);
             BeanConfig beanConfig = new BeanConfig();
-            beanConfig.setVersion("2.2.0");
+            beanConfig.setVersion("2.2.1");
             beanConfig.setSchemes(new String[]{"http"});
             beanConfig.setPrettyPrint(true);
             beanConfig.setTitle("JDemetra+ Web Service");
             Info info = new Info();
             info.setTitle("JDemetra+ Web Service");
             info.setDescription("Web service providing access to JDemetra+ algorithms and utilities");
-            info.setVersion("2.2.0");
+            info.setVersion("2.2.1");
             beanConfig.setInfo(info);
 
             beanConfig.setBasePath(servletConfig.getServletContext().getContextPath() + "/api");
