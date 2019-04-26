@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServlet;
  *
  * @author Mats Maggi
  */
-@WebServlet(name = "SwaggerJaxrsConfig", loadOnStartup = 2)
+@WebServlet(name = "SwaggerJaxrsConfig", urlPatterns = {"/SwaggerJaxrsConfig"}, loadOnStartup = 2)
 public class SwaggerJaxrsConfig extends HttpServlet {
 
     @Override

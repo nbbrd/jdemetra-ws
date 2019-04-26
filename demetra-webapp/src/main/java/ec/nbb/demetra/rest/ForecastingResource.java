@@ -67,7 +67,7 @@ public class ForecastingResource {
             @QueryParam(value = "start") @ApiParam(value = "start") int start,
             @QueryParam(value = "end") @ApiParam(value = "end") int end,
             @QueryParam(value = "algorithm") @ApiParam(value = "algorithm", defaultValue = "tramoseats") @DefaultValue("tramoseats") String algorithm,
-            @QueryParam(value = "spec") @ApiParam(value = "spec",  defaultValue = "TRfull") @DefaultValue("TRfull") String spec) {
+            @QueryParam(value = "spec") @ApiParam(value = "spec", defaultValue = "TRfull") @DefaultValue("TRfull") String spec) {
 
         TsData tsData = ts.create();
         TsFrequency freq = tsData.getFrequency();
@@ -80,20 +80,9 @@ public class ForecastingResource {
         }
 
         TsData b = null, f = null;
-        
+
         spec = mapSpec(algorithm, spec);
-        
-        PreprocessingModel model = null;
-        switch (algorithm.toLowerCase()) {
-            case "tramoseats":
-                model = TramoSpecification.defaultPreprocessor(TramoSpecification.Default.valueOfIgnoreCase(spec)).process(tsData, null);
-                break;
-            case "x13":
-                model = RegArimaSpecification.defaultPreprocessor(RegArimaSpecification.Default.valueOf(spec)).process(tsData, null);
-                break;
-            default:
-                throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, algorithm));
-        }
+        PreprocessingModel model = getModel(tsData, algorithm, spec);
 
         if (model != null) {
             if (nb > 0) {
@@ -122,8 +111,69 @@ public class ForecastingResource {
         result.name = ts.name;
         return Response.ok().entity(result).build();
     }
-    
+
+    @POST
+    @Path("/bynumber")
+    @Compress
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @ApiOperation(value = "Returns the new series with the amount of backcasts and forecasts requested", notes = "Only 'x13' and 'tramoseats' are currently supported", response = XmlTsData.class)
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "Forecasting/Backcasting successfully done", response = XmlTsData.class),
+                @ApiResponse(code = 400, message = "Bad request", response = String.class),
+                @ApiResponse(code = 500, message = "Invalid request", response = String.class)
+            }
+    )
+    public Response forecastByNumber(
+            @ApiParam(value = "ts", required = true) XmlTsData ts,
+            @QueryParam(value = "backcasts") @ApiParam(value = "backcasts", defaultValue = "0") @DefaultValue("0") int backcasts,
+            @QueryParam(value = "forecasts") @ApiParam(value = "forecasts", defaultValue = "0") @DefaultValue("0") int forecasts,
+            @QueryParam(value = "algorithm") @ApiParam(value = "algorithm", defaultValue = "tramoseats") @DefaultValue("tramoseats") String algorithm,
+            @QueryParam(value = "spec") @ApiParam(value = "spec", defaultValue = "TRfull") @DefaultValue("TRfull") String spec) {
+
+        TsData tsData = ts.create();
+        TsData b = null, f = null;
+
+        spec = mapSpec(algorithm, spec);
+        PreprocessingModel model = getModel(tsData, algorithm, spec);
+
+        if (model != null) {
+            if (backcasts > 0) {
+                b = model.backcast(backcasts, false);
+            }
+
+            if (forecasts > 0) {
+                f = model.forecast(forecasts, false);
+            }
+
+            if (b != null) {
+                tsData = tsData.update(b);
+            }
+
+            if (f != null) {
+                tsData = tsData.update(f);
+            }
+        }
+
+        XmlTsData result = new XmlTsData();
+        result.copy(tsData);
+        result.name = ts.name;
+        return Response.ok().entity(result).build();
+    }
+
     private String mapSpec(String algo, String spec) {
         return spec.toUpperCase().replace("RSA", algo.toLowerCase().equals("tramoseats") ? "TR" : "RG");
+    }
+
+    private PreprocessingModel getModel(TsData tsData, String algorithm, String spec) {
+        switch (algorithm.toLowerCase()) {
+            case "tramoseats":
+                return TramoSpecification.defaultPreprocessor(TramoSpecification.Default.valueOfIgnoreCase(spec)).process(tsData, null);
+            case "x13":
+                return RegArimaSpecification.defaultPreprocessor(RegArimaSpecification.Default.valueOf(spec)).process(tsData, null);
+            default:
+                throw new IllegalArgumentException(String.format(Messages.UNKNOWN_METHOD, algorithm));
+        }
     }
 }
