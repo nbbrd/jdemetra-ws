@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServlet;
  *
  * @author Mats Maggi
  */
-@WebServlet(name = "SwaggerJaxrsConfig", loadOnStartup = 2)
+@WebServlet(name = "SwaggerJaxrsConfig", urlPatterns = {"/SwaggerJaxrsConfig"}, loadOnStartup = 2)
 public class SwaggerJaxrsConfig extends HttpServlet {
 
     @Override
@@ -37,7 +37,6 @@ public class SwaggerJaxrsConfig extends HttpServlet {
             super.init(servletConfig);
             BeanConfig beanConfig = new BeanConfig();
             beanConfig.setVersion("2.2.2");
-            beanConfig.setSchemes(new String[]{"http"});
             beanConfig.setPrettyPrint(true);
             beanConfig.setTitle("JDemetra+ Web Service");
             Info info = new Info();

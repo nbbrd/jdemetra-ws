@@ -81,6 +81,26 @@ public class ForecastingTest extends JerseyTest {
         Assert.assertEquals(d.getObsCount(), resultTsData.getObsCount());
         Assert.assertEquals(d.getDomain(), resultTsData.getDomain());
     }
+    
+    @Test
+    public void forecastingSameDomainByNumber() throws JsonProcessingException {
+        TsData d = TsData.random(TsFrequency.Monthly);
+        XmlTsData ts = new XmlTsData();
+        ts.name = "MyTs";
+        ts.copy(d);
+
+        Response resp = callByNumber(ts, 0, 0);
+        Assert.assertNotNull(resp);
+        Assert.assertEquals(200, resp.getStatus());
+
+        XmlTsData responseTs = resp.readEntity(XmlTsData.class);
+        Assert.assertNotNull(responseTs);
+        Assert.assertEquals("MyTs", responseTs.name);
+
+        TsData resultTsData = responseTs.create();
+        Assert.assertEquals(d.getObsCount(), resultTsData.getObsCount());
+        Assert.assertEquals(d.getDomain(), resultTsData.getDomain());
+    }
 
     @Test
     public void backcasting() throws JsonProcessingException {
@@ -104,6 +124,65 @@ public class ForecastingTest extends JerseyTest {
         Assert.assertEquals(d.getObsCount() + 10, resultTsData.getObsCount());
         Assert.assertEquals(d.getEnd(), resultTsData.getEnd()); // Backcast so end unchanged
     }
+    
+    @Test
+    public void backcastingByNumber() throws JsonProcessingException {
+        TsData d = TsData.random(TsFrequency.Quarterly);
+        XmlTsData ts = new XmlTsData();
+        ts.name = "MyTs";
+        ts.copy(d);
+
+        Response resp = callByNumber(ts, 3, 0);
+
+        Assert.assertNotNull(resp);
+        Assert.assertEquals(200, resp.getStatus());
+        XmlTsData responseTs = resp.readEntity(XmlTsData.class);
+        Assert.assertNotNull(responseTs);
+        Assert.assertEquals("MyTs", responseTs.name);
+
+        TsData resultTsData = responseTs.create();
+        Assert.assertEquals(d.getObsCount() + 3, resultTsData.getObsCount());
+        Assert.assertEquals(d.getEnd(), resultTsData.getEnd()); // Backcast so end unchanged
+    }
+    
+    @Test
+    public void forecastingByNumber() throws JsonProcessingException {
+        TsData d = TsData.random(TsFrequency.Quarterly);
+        XmlTsData ts = new XmlTsData();
+        ts.name = "MyTs";
+        ts.copy(d);
+
+        Response resp = callByNumber(ts, 0, 6);
+
+        Assert.assertNotNull(resp);
+        Assert.assertEquals(200, resp.getStatus());
+        XmlTsData responseTs = resp.readEntity(XmlTsData.class);
+        Assert.assertNotNull(responseTs);
+        Assert.assertEquals("MyTs", responseTs.name);
+
+        TsData resultTsData = responseTs.create();
+        Assert.assertEquals(d.getObsCount() + 6, resultTsData.getObsCount());
+        Assert.assertEquals(d.getStart(), resultTsData.getStart()); // Backcast so end unchanged
+    }
+    
+    @Test
+    public void foreAndBackcastByNumber() throws JsonProcessingException {
+        TsData d = TsData.random(TsFrequency.Quarterly);
+        XmlTsData ts = new XmlTsData();
+        ts.name = "MyTs";
+        ts.copy(d);
+
+        Response resp = callByNumber(ts, 6, 4);
+
+        Assert.assertNotNull(resp);
+        Assert.assertEquals(200, resp.getStatus());
+        XmlTsData responseTs = resp.readEntity(XmlTsData.class);
+        Assert.assertNotNull(responseTs);
+        Assert.assertEquals("MyTs", responseTs.name);
+
+        TsData resultTsData = responseTs.create();
+        Assert.assertEquals(d.getObsCount() + 10, resultTsData.getObsCount());
+    }
 
     private Response callWS(XmlTsData ts, int start, int end) {
         JerseyClientBuilder jcb = new JerseyClientBuilder();
@@ -114,6 +193,22 @@ public class ForecastingTest extends JerseyTest {
         Response resp = jwt.path("forecast")
                 .queryParam("start", start)
                 .queryParam("end", end)
+                .request(MediaType.APPLICATION_JSON)
+                .acceptEncoding("gzip")
+                .post(Entity.entity(ts, MediaType.APPLICATION_XML));
+
+        return resp;
+    }
+    
+    private Response callByNumber(XmlTsData ts, int backcasts, int forecasts) {
+        JerseyClientBuilder jcb = new JerseyClientBuilder();
+        jcb.register(GZipEncoder.class);
+        JerseyClient jc = jcb.build();
+
+        JerseyWebTarget jwt = jc.target(getBaseUri());
+        Response resp = jwt.path("forecast/bynumber")
+                .queryParam("backcasts", backcasts)
+                .queryParam("forecasts", forecasts)
                 .request(MediaType.APPLICATION_JSON)
                 .acceptEncoding("gzip")
                 .post(Entity.entity(ts, MediaType.APPLICATION_XML));
