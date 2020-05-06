@@ -95,7 +95,6 @@ public class NewXMLTest extends JerseyTest {
                 .register(ec.nbb.demetra.exception.DemetraExceptionMapper.class)
                 .register(ec.nbb.ws.filters.GZipWriterInterceptor.class)
                 .register(ec.nbb.ws.filters.GZipReaderInterceptor.class)
-                .register(ec.nbb.demetra.filters.ChartBodyWriter.class)
                 .register(ec.nbb.ws.filters.CORSFilter.class)
                 .register(new LoggingFilter(logger, true));
     }
