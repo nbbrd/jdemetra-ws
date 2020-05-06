@@ -49,7 +49,6 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -167,7 +166,7 @@ public class TramoSeatsTest extends JerseyTest {
         try {
             String json = TestConfig.serializationJson(requests);
         } catch (JsonProcessingException ex) {
-            Exceptions.printStackTrace(ex);
+            throw new RuntimeException(ex);
         }
         Response resp = callWSTramoSeats(requests, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
 

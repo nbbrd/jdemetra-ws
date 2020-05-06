@@ -45,7 +45,6 @@ public class ApplicationConfig extends Application {
         resources.add(org.glassfish.jersey.jackson.JacksonFeature.class);
         resources.add(ec.nbb.ws.filters.GZipWriterInterceptor.class);
         resources.add(ec.nbb.ws.filters.GZipReaderInterceptor.class);
-        resources.add(ec.nbb.demetra.filters.ChartBodyWriter.class);
 
         return resources;
     }

@@ -27,7 +27,6 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import io.swagger.util.Json;
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -41,9 +40,8 @@ public class TestConfig {
         try {
             return new URI(LOCAL_URL);
         } catch (URISyntaxException ex) {
-            Exceptions.printStackTrace(ex);
+            throw new RuntimeException(ex);
         }
-        return null;
     }
     
     public static String serializationJson(Object obj) throws JsonProcessingException {
